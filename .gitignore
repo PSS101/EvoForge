@@ -1,0 +1,27 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Databases & local state
+database/project_state.db
+*.db
+*.sqlite
+
+# Environment variables
+.env
+
+# Large local binaries & models
+ollama_bin/
+
+# Local IDE configuration
+.vscode/
+.idea/
