@@ -1,4 +1,4 @@
-from calculator import add, subtract, multiply, divide
+from calculator import add, subtract, multiply, divide, modulo
 
 def perform_operation(operation: str, num1: float, num2: float) -> float:
     """Delegates arithmetic choices to the math core logic."""
@@ -10,5 +10,7 @@ def perform_operation(operation: str, num1: float, num2: float) -> float:
         return multiply(num1, num2)
     elif operation == '/':
         return divide(num1, num2)
+    elif operation == '%':
+        return modulo(num1, num2)
     else:
         raise ValueError(f"Unknown operation: {operation}")

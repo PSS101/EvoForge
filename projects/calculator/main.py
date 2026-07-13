@@ -1,15 +1,25 @@
 import sys
 from operations import perform_operation
+from calculator import get_history
 
 def main():
     print("Simple Calculator Command-Line Utility")
-    print("Type 'q' to quit.")
+    print("Type 'h' to view history, 'q' to quit.")
     while True:
         try:
-            choice = input("Enter operation (+, -, *, /): ").strip()
+            choice = input("Enter operation (+, -, *, /, %): ").strip()
             if choice.lower() == 'q':
                 break
-            if choice in ['+', '-', '*', '/']:
+            if choice.lower() == 'h':
+                history = get_history()
+                if not history:
+                    print("No operations performed yet.")
+                else:
+                    print("Operation History:")
+                    for entry in history:
+                        print(f"  {entry}")
+                continue
+            if choice in ['+', '-', '*', '/', '%']:
                 num_input = input("Enter two numbers separated by space: ").split()
                 if len(num_input) != 2:
                     print("Error: Please enter exactly two numbers.")
