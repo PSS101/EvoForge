@@ -2,13 +2,17 @@ import os
 from crewai import Crew, Process, Task
 from agents.base_agent import BaseAgent
 from database.db_manager import DBManager
-from tools.file_tools import calculate_hash, read_file
+from tools.file_tools import calculate_hash, read_file, write_file, save_json
 from tools.project_tools import (
     read_project_file,
     write_project_file,
     list_project_files,
     analyze_python_ast
 )
+from tools.requirement_tools import classify_requirements
+from tools.static_analysis import build_dependency_graph, dependency_graph_to_json
+from tools.reuse_tools import generate_reuse_decision_report
+from tools.impact_tools import generate_test_impact_report
 
 class SDLCCrewManager:
     def __init__(self, project_name: str):
@@ -31,99 +35,157 @@ class SDLCCrewManager:
 
     def run_pipeline(self, prompt: str, mode: str = "new"):
         """
-        Runs the multi-agent SDLC pipeline.
+        Runs the multi-agent SDLC pipeline incrementally.
         mode can be 'new' or 'evolve'.
         """
-        # Load agents
-        req_agent_wrapper = BaseAgent("requirement_agent")
-        design_agent_wrapper = BaseAgent("design_agent")
-        code_agent_wrapper = BaseAgent("code_agent")
-        testing_agent_wrapper = BaseAgent("testing_agent")
-        doc_agent_wrapper = BaseAgent("documentation_agent")
+        srs_path = os.path.join(self.reports_dir, "SRS.md")
+        delta_path = os.path.join(self.reports_dir, "Requirement_Delta_Report.md")
+        dependency_path = os.path.join(self.reports_dir, "Dependency_Graph.json")
+        reuse_path = os.path.join(self.reports_dir, "Reuse_Decision_Report.md")
+        test_impact_path = os.path.join(self.reports_dir, "Test_Impact_Report.md")
 
-        # Create agents with appropriate tools
-        # Requirement and Design agents need read/write tools
-        req_agent = req_agent_wrapper.get_agent(tools=[read_project_file, write_project_file])
-        design_agent = design_agent_wrapper.get_agent(tools=[read_project_file, write_project_file])
-        
-        # Code agent needs AST analysis and write tools
+        existing_srs = self._load_existing_srs()
+        raw_srs = self._run_requirement_stage(prompt, existing_srs, srs_path)
+
+        merged_srs, delta_report, classified_requirements = classify_requirements(existing_srs, raw_srs)
+        write_file(srs_path, merged_srs)
+        write_file(delta_path, delta_report)
+        self.db.store_srs_version(self.project_id, merged_srs, note=mode)
+
+        dependency_graph = build_dependency_graph(self.project_dir)
+        save_json(dependency_path, dependency_graph)
+        self.db.store_dependency_graph(self.project_id, "static", dependency_graph_to_json(dependency_graph), file_path=dependency_path)
+
+        reuse_report = generate_reuse_decision_report(self.project_dir, merged_srs)
+        write_file(reuse_path, reuse_report)
+
+        impacted_modules = self._guess_impacted_modules(classified_requirements)
+        test_impact_report = generate_test_impact_report(impacted_modules, self.project_dir)
+        write_file(test_impact_path, test_impact_report)
+
+        self._run_design_stage(design_output=os.path.join(self.reports_dir, "Design.md"), delta_path=delta_path)
+        self._run_code_stage(code_agent_wrapper=BaseAgent("code_agent"), code_output=None, dependency_path=dependency_path, reuse_path=reuse_path, delta_path=delta_path)
+        self._run_testing_stage(testing_output_dir=os.path.join(self.project_dir, "tests"), test_impact_path=test_impact_path)
+        self._run_documentation_stage(doc_output_dir=self.project_dir)
+
+        self._update_db_registry_and_run(mode)
+        return {
+            "srs": srs_path,
+            "delta_report": delta_path,
+            "dependency_graph": dependency_path,
+            "reuse_report": reuse_path,
+            "test_impact_report": test_impact_path
+        }
+
+    def _load_existing_srs(self) -> str:
+        srs_path = os.path.join(self.reports_dir, "SRS.md")
+        if os.path.exists(srs_path):
+            return read_file(srs_path)
+        return ""
+
+    def _run_single_stage(self, agent_wrapper: BaseAgent, task_name: str, task_vars: dict, output_file=None, tools=None):
+        agent = agent_wrapper.get_agent(tools=tools)
+        description = agent_wrapper.get_task_description(task_name).format(**task_vars)
+        expected = agent_wrapper.get_task_expected_output(task_name)
+        task = Task(
+            description=description,
+            expected_output=expected,
+            agent=agent,
+            output_file=output_file
+        )
+        crew = Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=True)
+        print(f"Running {task_name}...")
+        return crew.kickoff()
+
+    def _run_requirement_stage(self, prompt: str, existing_srs: str, output_file: str) -> str:
+        req_agent_wrapper = BaseAgent("requirement_agent")
+        req_task_vars = {
+            "prompt": prompt,
+            "reports_dir": self.reports_dir,
+            "existing_srs": existing_srs or ""
+        }
+        self._run_single_stage(
+            req_agent_wrapper,
+            "requirement_task",
+            req_task_vars,
+            output_file=output_file,
+            tools=[read_project_file, write_project_file]
+        )
+        return read_file(output_file)
+
+    def _run_design_stage(self, design_output: str, delta_path: str):
+        design_agent_wrapper = BaseAgent("design_agent")
+        design_agent_wrapper.get_agent(tools=[read_project_file, write_project_file])
+        design_task_vars = {
+            "reports_dir": self.reports_dir,
+            "delta_path": delta_path
+        }
+        self._run_single_stage(
+            design_agent_wrapper,
+            "design_task",
+            design_task_vars,
+            output_file=design_output,
+            tools=[read_project_file, write_project_file]
+        )
+
+    def _run_code_stage(self, code_agent_wrapper: BaseAgent, code_output, dependency_path: str, reuse_path: str, delta_path: str):
         code_agent = code_agent_wrapper.get_agent(tools=[
             read_project_file,
             write_project_file,
             list_project_files,
             analyze_python_ast
         ])
+        existing_source_code = self._collect_existing_source_code()
+        code_task_vars = {
+            "reports_dir": self.reports_dir,
+            "project_dir": self.project_dir,
+            "existing_source_code": existing_source_code,
+            "dependency_graph_path": dependency_path,
+            "reuse_report_path": reuse_path,
+            "delta_report_path": delta_path
+        }
+        task = Task(
+            description=code_agent_wrapper.get_task_description("code_task").format(**code_task_vars),
+            expected_output=code_agent_wrapper.get_task_expected_output("code_task"),
+            agent=code_agent,
+            output_file=code_output
+        )
+        crew = Crew(agents=[code_agent], tasks=[task], process=Process.sequential, verbose=True)
+        print("Running code_task...")
+        return crew.kickoff()
 
-        # Testing agent needs write tools to create/run tests
+    def _run_testing_stage(self, testing_output_dir: str, test_impact_path: str):
+        testing_agent_wrapper = BaseAgent("testing_agent")
         testing_agent = testing_agent_wrapper.get_agent(tools=[read_project_file, write_project_file, list_project_files])
-        
-        # Documentation agent needs read/write tools
+        testing_task_vars = {
+            "project_dir": self.project_dir,
+            "reports_dir": self.reports_dir,
+            "test_impact_path": test_impact_path
+        }
+        self._run_single_stage(
+            testing_agent_wrapper,
+            "testing_task",
+            testing_task_vars,
+            output_file=None,
+            tools=[read_project_file, write_project_file, list_project_files]
+        )
+
+    def _run_documentation_stage(self, doc_output_dir: str):
+        doc_agent_wrapper = BaseAgent("documentation_agent")
         doc_agent = doc_agent_wrapper.get_agent(tools=[read_project_file, write_project_file])
-
-        # Setup Agents list
-        agents_list = [req_agent]
-        tasks_list = []
-
-        # 1. Requirement Task
-        req_desc = req_agent_wrapper.get_task_description("requirement_task").format(
-            prompt=prompt,
-            reports_dir=self.reports_dir
+        doc_task_vars = {
+            "project_dir": self.project_dir,
+            "reports_dir": self.reports_dir
+        }
+        self._run_single_stage(
+            doc_agent_wrapper,
+            "documentation_task",
+            doc_task_vars,
+            output_file=None,
+            tools=[read_project_file, write_project_file]
         )
-        req_expected = req_agent_wrapper.get_task_expected_output("requirement_task")
-        req_task = Task(
-            description=req_desc,
-            expected_output=req_expected,
-            agent=req_agent
-        )
-        tasks_list.append(req_task)
 
-        # 2. Impact Analysis Task (only for evolution)
-        impact_report_path = os.path.join(self.reports_dir, "Impact_Report.md")
-        if mode == "evolve":
-            impact_agent_wrapper = BaseAgent("impact_agent")
-            impact_agent = impact_agent_wrapper.get_agent(tools=[
-                read_project_file,
-                write_project_file,
-                list_project_files,
-                analyze_python_ast
-            ])
-            agents_list.append(impact_agent)
-
-            # Get summary of existing files from DB registry
-            registry = self.db.get_file_registry(self.project_id)
-            existing_files_summary = "\n".join([
-                f"- File: {f[0]}, Type: {f[1]}, Hash: {f[2]}" for f in registry
-            ]) if registry else "No files registered yet."
-
-            impact_desc = impact_agent_wrapper.get_task_description("impact_task").format(
-                reports_dir=self.reports_dir,
-                existing_files_summary=existing_files_summary
-            )
-            impact_expected = impact_agent_wrapper.get_task_expected_output("impact_task")
-            impact_task = Task(
-                description=impact_desc,
-                expected_output=impact_expected,
-                agent=impact_agent
-            )
-            tasks_list.append(impact_task)
-
-        # 3. Design Task
-        agents_list.append(design_agent)
-        design_desc = design_agent_wrapper.get_task_description("design_task").format(
-            reports_dir=self.reports_dir
-        )
-        design_expected = design_agent_wrapper.get_task_expected_output("design_task")
-        design_task = Task(
-            description=design_desc,
-            expected_output=design_expected,
-            agent=design_agent
-        )
-        tasks_list.append(design_task)
-
-        # 4. Code Task
-        agents_list.append(code_agent)
-        
-        # Load existing source code context if any
+    def _collect_existing_source_code(self) -> str:
         existing_source_code = ""
         for root, dirs, files in os.walk(self.project_dir):
             if any(ignored in root for ignored in [".venv", "__pycache__", ".git", ".pytest_cache", "tests"]):
@@ -133,66 +195,18 @@ class SDLCCrewManager:
                 rel_path = os.path.relpath(filepath, self.project_dir)
                 content = read_file(filepath)
                 existing_source_code += f"\n--- FILE: {rel_path} ---\n{content}\n"
-        if not existing_source_code:
-            existing_source_code = "No existing source code."
+        return existing_source_code if existing_source_code else "No existing source code."
 
-        code_desc = code_agent_wrapper.get_task_description("code_task").format(
-            reports_dir=self.reports_dir,
-            project_dir=self.project_dir,
-            existing_source_code=existing_source_code
-        )
-        code_expected = code_agent_wrapper.get_task_expected_output("code_task")
-        code_task = Task(
-            description=code_desc,
-            expected_output=code_expected,
-            agent=code_agent
-        )
-        tasks_list.append(code_task)
-
-        # 5. Testing Task
-        agents_list.append(testing_agent)
-        testing_desc = testing_agent_wrapper.get_task_description("testing_task").format(
-            project_dir=self.project_dir,
-            reports_dir=self.reports_dir
-        )
-        testing_expected = testing_agent_wrapper.get_task_expected_output("testing_task")
-        testing_task = Task(
-            description=testing_desc,
-            expected_output=testing_expected,
-            agent=testing_agent
-        )
-        tasks_list.append(testing_task)
-
-        # 6. Documentation Task
-        agents_list.append(doc_agent)
-        doc_desc = doc_agent_wrapper.get_task_description("documentation_task").format(
-            project_dir=self.project_dir,
-            reports_dir=self.reports_dir
-        )
-        doc_expected = doc_agent_wrapper.get_task_expected_output("documentation_task")
-        doc_task = Task(
-            description=doc_desc,
-            expected_output=doc_expected,
-            agent=doc_agent
-        )
-        tasks_list.append(doc_task)
-
-        # Initialize Crew
-        crew = Crew(
-            agents=agents_list,
-            tasks=tasks_list,
-            process=Process.sequential,
-            verbose=True
-        )
-
-        # Run Crew
-        print(f"Starting SDLC Crew in '{mode}' mode for project '{self.project_name}'...")
-        result = crew.kickoff()
-        print("SDLC Crew run complete.")
-
-        # Update registry and log runs
-        self._update_db_registry_and_run(mode)
-        return result
+    def _guess_impacted_modules(self, classified_requirements):
+        changed = []
+        for item in classified_requirements:
+            if item["tag"] in {"NEW", "MODIFIED", "REMOVED"}:
+                keyword = re.sub(r"[^a-zA-Z0-9_]+", "_", item["text"]).strip("_")
+                candidate = None
+                if keyword:
+                    candidate = f"{keyword.split('_')[0]}.py"
+                changed.append(candidate or item["section"])
+        return [module for module in sorted(set(changed)) if module]
 
     def _update_db_registry_and_run(self, mode: str):
         """Scan project and reports directories to update file hashes and log the run."""
@@ -235,3 +249,4 @@ class SDLCCrewManager:
         status = "success" if os.path.exists(srs_path) else "failed"
         self.db.log_run(self.project_id, srs_hash, design_hash, status)
         print(f"Logged SDLC run state in SQLite for project ID {self.project_id}.")
+
