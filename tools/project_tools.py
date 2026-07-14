@@ -1,4 +1,11 @@
-from crewai.tools import tool
+try:
+    from crewai.tools import tool
+except Exception:
+    # Fallback no-op decorator when crewai is not installed — allows local execution without agent tooling
+    def tool(name=None):
+        def _decorator(fn):
+            return fn
+        return _decorator
 import os
 from tools.file_tools import read_file, write_file, parse_python_ast
 

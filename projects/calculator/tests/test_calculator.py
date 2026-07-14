@@ -1,5 +1,5 @@
 import unittest
-from calculator import Calculator, add, subtract, multiply, divide, modulo, get_history
+from calculator import Calculator, add, subtract, multiply, divide, modulo, get_history, sqrt
 from operations import perform_operation
 
 class TestCalculator(unittest.TestCase):
@@ -52,3 +52,11 @@ class TestCalculator(unittest.TestCase):
         self.assertEqual(perform_operation('*', 5, 6), 30)
         self.assertEqual(perform_operation('/', 8, 2), 4.0)
         self.assertEqual(perform_operation('%', 5, 2), 1.0)
+        self.assertAlmostEqual(perform_operation('s', 9), 3.0)
+
+    def test_sqrt(self):
+        calc = Calculator()
+        self.assertAlmostEqual(calc.sqrt(9), 3.0)
+        self.assertAlmostEqual(calc.sqrt(2), 2**0.5)
+        with self.assertRaises(ValueError):
+            calc.sqrt(-1)

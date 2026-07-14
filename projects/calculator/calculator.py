@@ -1,3 +1,5 @@
+import math
+
 class Calculator:
     def __init__(self):
         self.history = []
@@ -44,6 +46,18 @@ class Calculator:
         self.history.append(f"{num1} % {num2} = {res}")
         return res
 
+    def sqrt(self, num: float) -> float:
+        """Compute square root of a non-negative number.
+
+        Raises:
+            ValueError: if num is negative.
+        """
+        if num < 0:
+            raise ValueError("Cannot compute square root of negative number.")
+        res = math.sqrt(num)
+        self.history.append(f"sqrt({num}) = {res}")
+        return res
+
     def get_history(self):
         """Returns the list of recorded operations."""
         return self.history
@@ -65,6 +79,9 @@ def divide(num1: float, num2: float) -> float:
 
 def modulo(num1: float, num2: float) -> float:
     return _shared_calculator.modulo(num1, num2)
+
+def sqrt(num: float) -> float:
+    return _shared_calculator.sqrt(num)
 
 def get_history():
     return _shared_calculator.get_history()
