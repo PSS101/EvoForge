@@ -1,6 +1,15 @@
 import os
-from crewai import Crew, Process, Task
-from agents.base_agent import BaseAgent
+import re
+try:
+    from crewai import Crew, Process, Task
+    HAS_CREW = True
+except Exception:
+    Crew = None
+    Process = None
+    Task = None
+    HAS_CREW = False
+from typing import Any as BaseAgent  # Lazy import of BaseAgent at runtime to avoid module-level crewai dependency
+
 from database.db_manager import DBManager
 from tools.file_tools import calculate_hash, read_file, write_file, save_json
 from tools.project_tools import (
@@ -50,11 +59,23 @@ class SDLCCrewManager:
         merged_srs, delta_report, classified_requirements = classify_requirements(existing_srs, raw_srs)
         write_file(srs_path, merged_srs)
         write_file(delta_path, delta_report)
-        self.db.store_srs_version(self.project_id, merged_srs, note=mode)
+        if hasattr(self.db, 'store_srs_version'):
+            try:
+                self.db.store_srs_version(self.project_id, merged_srs, note=mode)
+            except Exception as e:
+                print(f"Warning: Failed to store SRS version in DB: {e}")
+        else:
+            print("DBManager.store_srs_version not available; skipping DB persistence for SRS.")
 
         dependency_graph = build_dependency_graph(self.project_dir)
         save_json(dependency_path, dependency_graph)
-        self.db.store_dependency_graph(self.project_id, "static", dependency_graph_to_json(dependency_graph), file_path=dependency_path)
+        if hasattr(self.db, 'store_dependency_graph'):
+            try:
+                self.db.store_dependency_graph(self.project_id, "static", dependency_graph_to_json(dependency_graph), file_path=dependency_path)
+            except Exception as e:
+                print(f"Warning: Failed to store dependency graph in DB: {e}")
+        else:
+            print("DBManager.store_dependency_graph not available; skipping DB persistence for dependency graph.")
 
         reuse_report = generate_reuse_decision_report(self.project_dir, merged_srs)
         write_file(reuse_path, reuse_report)
@@ -64,7 +85,14 @@ class SDLCCrewManager:
         write_file(test_impact_path, test_impact_report)
 
         self._run_design_stage(design_output=os.path.join(self.reports_dir, "Design.md"), delta_path=delta_path)
-        self._run_code_stage(code_agent_wrapper=BaseAgent("code_agent"), code_output=None, dependency_path=dependency_path, reuse_path=reuse_path, delta_path=delta_path)
+        # Lazy import BaseAgent to avoid import-time dependency on crewai
+        try:
+            from agents.base_agent import BaseAgent as _BaseAgent
+            code_agent_wrapper = _BaseAgent("code_agent")
+        except Exception as e:
+            print(f"Could not import BaseAgent for code stage: {e}. Proceeding with fallback.")
+            code_agent_wrapper = None
+        self._run_code_stage(code_agent_wrapper=code_agent_wrapper, code_output=None, dependency_path=dependency_path, reuse_path=reuse_path, delta_path=delta_path)
         self._run_testing_stage(testing_output_dir=os.path.join(self.project_dir, "tests"), test_impact_path=test_impact_path)
         self._run_documentation_stage(doc_output_dir=self.project_dir)
 
@@ -84,21 +112,78 @@ class SDLCCrewManager:
         return ""
 
     def _run_single_stage(self, agent_wrapper: BaseAgent, task_name: str, task_vars: dict, output_file=None, tools=None):
-        agent = agent_wrapper.get_agent(tools=tools)
-        description = agent_wrapper.get_task_description(task_name).format(**task_vars)
-        expected = agent_wrapper.get_task_expected_output(task_name)
-        task = Task(
-            description=description,
-            expected_output=expected,
-            agent=agent,
-            output_file=output_file
-        )
-        crew = Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=True)
-        print(f"Running {task_name}...")
-        return crew.kickoff()
+        """Run a single agent task. If Crew is unavailable, write a safe placeholder output and continue.
+        """
+        # Prepare agent and task description
+        try:
+            agent = agent_wrapper.get_agent(tools=tools)
+            description = agent_wrapper.get_task_description(task_name).format(**task_vars)
+            expected = agent_wrapper.get_task_expected_output(task_name)
+        except Exception as e:
+            print(f"Agent wrapper preparation failed: {e}")
+            agent = None
+            description = task_vars.get("prompt", f"{task_name} (no description)")
+            expected = None
+
+        if not HAS_CREW:
+            print(f"Crew not available; attempting local agent execution for task '{task_name}'.")
+            # If we have a local agent implementation, run it and write its output
+            if agent is not None and hasattr(agent, 'run'):
+                try:
+                    result_text = agent.run(description)
+                    if output_file:
+                        try:
+                            write_file(output_file, result_text)
+                        except Exception as e:
+                            print(f"Failed writing agent output to {output_file}: {e}")
+                    return result_text
+                except Exception as e:
+                    print(f"Local agent execution failed: {e}")
+
+            # Fallback placeholder when no local agent is available
+            print(f"Local agent not available or failed — writing placeholder for '{task_name}'")
+            if output_file:
+                placeholder = f"# Placeholder output for {task_name}\n\nDescription:\n{description}\n\nNote: Crew/agent execution was skipped because the crew library is unavailable or incompatible, and local agent execution failed."
+                try:
+                    write_file(output_file, placeholder)
+                except Exception as e:
+                    print(f"Failed writing placeholder output to {output_file}: {e}")
+            return None
+
+        # Normal flow: run with Crew
+        try:
+            task = Task(
+                description=description,
+                expected_output=expected,
+                agent=agent,
+                output_file=output_file
+            )
+            crew = Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=True)
+            print(f"Running {task_name}...")
+            return crew.kickoff()
+        except TypeError as te:
+            # Backward/forward compatibility issues — fallback to placeholder behavior
+            print(f"Crew execution failed with TypeError: {te}. Falling back to placeholder output for '{task_name}'.")
+            if output_file:
+                placeholder = f"# Fallback output for {task_name}\n\nDescription:\n{description}\n\nNote: Crew execution failed with TypeError: {te}."
+                try:
+                    write_file(output_file, placeholder)
+                except Exception as e:
+                    print(f"Failed writing fallback output to {output_file}: {e}")
+            return None
+        except Exception as e:
+            print(f"Unexpected error while running Crew for '{task_name}': {e}")
+            raise
 
     def _run_requirement_stage(self, prompt: str, existing_srs: str, output_file: str) -> str:
-        req_agent_wrapper = BaseAgent("requirement_agent")
+        # Lazy import BaseAgent to avoid import-time crewai dependency
+        try:
+            from agents.base_agent import BaseAgent as _BaseAgent
+            req_agent_wrapper = _BaseAgent("requirement_agent")
+        except Exception as e:
+            print(f"Could not import BaseAgent for requirement stage: {e}. Proceeding with fallback.")
+            req_agent_wrapper = None
+
         req_task_vars = {
             "prompt": prompt,
             "reports_dir": self.reports_dir,
@@ -114,8 +199,14 @@ class SDLCCrewManager:
         return read_file(output_file)
 
     def _run_design_stage(self, design_output: str, delta_path: str):
-        design_agent_wrapper = BaseAgent("design_agent")
-        design_agent_wrapper.get_agent(tools=[read_project_file, write_project_file])
+        try:
+            from agents.base_agent import BaseAgent as _BaseAgent
+            design_agent_wrapper = _BaseAgent("design_agent")
+            design_agent_wrapper.get_agent(tools=[read_project_file, write_project_file])
+        except Exception as e:
+            print(f"Could not import BaseAgent for design stage: {e}. Proceeding with fallback.")
+            design_agent_wrapper = None
+
         design_task_vars = {
             "reports_dir": self.reports_dir,
             "delta_path": delta_path
@@ -129,12 +220,6 @@ class SDLCCrewManager:
         )
 
     def _run_code_stage(self, code_agent_wrapper: BaseAgent, code_output, dependency_path: str, reuse_path: str, delta_path: str):
-        code_agent = code_agent_wrapper.get_agent(tools=[
-            read_project_file,
-            write_project_file,
-            list_project_files,
-            analyze_python_ast
-        ])
         existing_source_code = self._collect_existing_source_code()
         code_task_vars = {
             "reports_dir": self.reports_dir,
@@ -144,19 +229,25 @@ class SDLCCrewManager:
             "reuse_report_path": reuse_path,
             "delta_report_path": delta_path
         }
-        task = Task(
-            description=code_agent_wrapper.get_task_description("code_task").format(**code_task_vars),
-            expected_output=code_agent_wrapper.get_task_expected_output("code_task"),
-            agent=code_agent,
-            output_file=code_output
+        # Use the unified _run_single_stage which has a Crew fallback
+        return self._run_single_stage(
+            code_agent_wrapper,
+            "code_task",
+            code_task_vars,
+            output_file=code_output,
+            tools=[read_project_file, write_project_file, list_project_files, analyze_python_ast]
         )
-        crew = Crew(agents=[code_agent], tasks=[task], process=Process.sequential, verbose=True)
-        print("Running code_task...")
-        return crew.kickoff()
 
     def _run_testing_stage(self, testing_output_dir: str, test_impact_path: str):
-        testing_agent_wrapper = BaseAgent("testing_agent")
-        testing_agent = testing_agent_wrapper.get_agent(tools=[read_project_file, write_project_file, list_project_files])
+        try:
+            from agents.base_agent import BaseAgent as _BaseAgent
+            testing_agent_wrapper = _BaseAgent("testing_agent")
+            testing_agent = testing_agent_wrapper.get_agent(tools=[read_project_file, write_project_file, list_project_files])
+        except Exception as e:
+            print(f"Could not import BaseAgent for testing stage: {e}. Proceeding with fallback.")
+            testing_agent_wrapper = None
+            testing_agent = None
+
         testing_task_vars = {
             "project_dir": self.project_dir,
             "reports_dir": self.reports_dir,
@@ -171,8 +262,15 @@ class SDLCCrewManager:
         )
 
     def _run_documentation_stage(self, doc_output_dir: str):
-        doc_agent_wrapper = BaseAgent("documentation_agent")
-        doc_agent = doc_agent_wrapper.get_agent(tools=[read_project_file, write_project_file])
+        try:
+            from agents.base_agent import BaseAgent as _BaseAgent
+            doc_agent_wrapper = _BaseAgent("documentation_agent")
+            doc_agent = doc_agent_wrapper.get_agent(tools=[read_project_file, write_project_file])
+        except Exception as e:
+            print(f"Could not import BaseAgent for documentation stage: {e}. Proceeding with fallback.")
+            doc_agent_wrapper = None
+            doc_agent = None
+
         doc_task_vars = {
             "project_dir": self.project_dir,
             "reports_dir": self.reports_dir

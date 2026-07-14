@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 import ast
 
@@ -12,12 +13,19 @@ def calculate_hash(file_path):
         hasher.update(buf)
     return hasher.hexdigest()
 
+
 def calculate_content_hash(content: str) -> str:
     """Calculate the SHA-256 hash of a string content."""
     hasher = hashlib.sha256()
     hasher.update(content.encode("utf-8"))
     return hasher.hexdigest()
 
+
+def save_json(file_path: str, data: object) -> None:
+    """Write JSON serializable data to a file."""
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
 def read_file(file_path):
     """Read contents of a file safely."""
     if not os.path.exists(file_path):

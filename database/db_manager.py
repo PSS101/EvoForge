@@ -50,6 +50,31 @@ class DBManager:
                     FOREIGN KEY(project_id) REFERENCES projects(id)
                 );
             """)
+            # SRS version history for incremental comparison
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS srs_versions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    project_id INTEGER,
+                    version INTEGER,
+                    content_hash TEXT,
+                    content TEXT,
+                    note TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY(project_id) REFERENCES projects(id)
+                );
+            """)
+            # Dependency graph storage and extracted metadata
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS dependency_graphs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    project_id INTEGER,
+                    graph_type TEXT,
+                    file_path TEXT,
+                    graph_json TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY(project_id) REFERENCES projects(id)
+                );
+            """)
             conn.commit()
 
     def register_project(self, name, path):
