@@ -1,4 +1,4 @@
-- # Software Requirements Specification (SRS)
+# Software Requirements Specification (SRS)
 
 ## 1. Introduction
 
