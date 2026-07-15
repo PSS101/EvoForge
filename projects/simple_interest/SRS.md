@@ -1,0 +1,1 @@
+The SRS.md file contains the installation guide, usage examples, feature list, and test runner instructions. It is a comprehensive document for users of the simple interest application.
