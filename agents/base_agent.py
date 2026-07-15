@@ -133,7 +133,9 @@ class BaseAgent:
                 max_iter=5
             )
 
-        # Fallback: simple local agent that uses the LLM client created in _init_llm
+        return self._build_local_agent(config)
+
+    def _build_local_agent(self, config):
         class LocalAgent:
             def __init__(self, role, goal, backstory, llm_client):
                 self.role = role
@@ -142,21 +144,31 @@ class BaseAgent:
                 self.llm = llm_client
 
             def run(self, prompt: str) -> str:
-                # Use the underlying llm client to generate a response
+                # Use the underlying llm client to generate a response.
                 try:
-                    # OllamaClient defines .generate
                     if hasattr(self.llm, 'generate'):
-                        return self.llm.generate(prompt)
-                    # LangChain/Chat models can be called differently — attempt .generate_prompt or __call__
+                        result = self.llm.generate(prompt)
+                        return str(result)
+                    if hasattr(self.llm, 'call'):
+                        result = self.llm.call(prompt)
+                        return str(result)
+                    if hasattr(self.llm, 'acall'):
+                        result = self.llm.acall(prompt)
+                        return str(result)
                     if hasattr(self.llm, '__call__'):
-                        return str(self.llm(prompt))
-                    if hasattr(self.llm, 'generate'):
-                        return str(self.llm.generate(prompt))
+                        result = self.llm(prompt)
+                        return str(result)
                 except Exception as e:
                     return f"LOCAL_AGENT_ERROR: {e}"
                 return ""
 
         return LocalAgent(config["role"], config["goal"], config["backstory"], self.llm)
+
+    def get_local_agent(self):
+        config = self.agent_config.get(self.agent_name)
+        if not config:
+            raise ValueError(f"Agent '{self.agent_name}' config not found in agents.yaml")
+        return self._build_local_agent(config)
 
     def get_task_description(self, task_name: str) -> str:
         config = self.task_config.get(task_name)

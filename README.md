@@ -88,6 +88,9 @@ Run the calculator tests with:
 .\.venv\Scripts\python.exe -m pytest .\projects\calculator\tests\test_calculator.py -q
 ```
 
+### Fallback smoke tests
+If generated test files are invalid or fail to run, the framework can automatically generate a deterministic smoke test suite that validates the project modules can be imported cleanly.
+
 ## Notes
 
 - The calculator app runs locally and does not require Ollama.

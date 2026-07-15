@@ -55,6 +55,11 @@ code_task:
     3. Only write new files or modify files marked for modification by the requirement delta and reuse reports. Do NOT overwrite unchanged files.
     4. Preserve architecture, naming conventions, imports, and coding style.
     5. You MUST use the `write_project_file` tool to save each new or modified Python source file to `{project_dir}`. Do NOT just present the code in your final answer; you MUST write it to the filesystem.
+    6. If the write_project_file tool is unavailable, output files using this plain-text marker format instead:
+       --- FILE: <relative_path> ---
+       <file contents>
+       --- FILE: <relative_path> ---
+    7. If you cannot use the file tool and the code is returned as plain text, still write the full response into a fallback file named `projects/<project_dir>/code_task_fallback.py` or a similarly appropriate `.py` file.
   expected_output: >
     Complete, functional, and syntactically correct Python files in the {project_dir} directory.
 
@@ -65,6 +70,14 @@ testing_task:
     Create/update files like `test_*.py`. Make sure the tests cover all functional requirements, boundary conditions, edge cases, and exception handling.
     Ensure test files import modules correctly and run independently.
     You MUST use the `write_project_file` tool to save the test files to `{project_dir}/tests`. Do NOT just present the test code in your final answer; you MUST write it to the filesystem.
+    If the write_project_file tool is unavailable, output test files using this plain-text marker format instead:
+       --- FILE: tests/<relative_path> ---
+       <file contents>
+       --- FILE: tests/<relative_path> ---
+    If the write_project_file tool is unavailable, output test files using this plain-text marker format instead:
+       --- FILE: tests/<relative_path> ---
+       <file contents>
+       --- FILE: tests/<relative_path> ---
   expected_output: >
     A complete pytest suite consisting of test_*.py files verifying the application correctness.
 
@@ -76,5 +89,13 @@ documentation_task:
     1. {project_dir}/README.md: Installation guides, usage examples, feature list, and test runner instructions.
     2. {project_dir}/User_Manual.md: Detailed manual detailing how a user interacts with the app, with command-line or interface examples.
     You MUST use the `write_project_file` tool to save README.md and User_Manual.md to `{project_dir}`. Do NOT just present the documentation in your final answer; you MUST write it to the filesystem.
+    If the write_project_file tool is unavailable, output documentation files using this plain-text marker format instead:
+       --- FILE: <relative_path> ---
+       <file contents>
+       --- FILE: <relative_path> ---
+    If the write_project_file tool is unavailable, output documentation files using this plain-text marker format instead:
+       --- FILE: <relative_path> ---
+       <file contents>
+       --- FILE: <relative_path> ---
   expected_output: >
     Updated and professional README.md and User_Manual.md files under the project directory.
