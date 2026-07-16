@@ -3,7 +3,7 @@ import os
 import re
 try:
     from crewai import Crew, Process, Task
-    HAS_CREW = True
+    HAS_CREW = False  # Force disabled due to LLM compatibility issues with custom clients
 except Exception:
     Crew = None
     Process = None
@@ -323,7 +323,7 @@ class SDLCCrewManager:
         try:
             task = Task(
                 description=description,
-                expected_output=expected,
+                expected_output=expected or f"Completed output for {task_name}",
                 agent=agent,
                 output_file=output_file
             )
