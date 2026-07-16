@@ -2,7 +2,7 @@ import os
 from crewai import Crew, Process, Task
 from agents.base_agent import BaseAgent
 from database.db_manager import DBManager
-from tools.file_tools import calculate_hash, read_file
+from tools.file_tools import calculate_hash, read_file, write_file
 from tools.project_tools import (
     read_project_file,
     write_project_file,
@@ -65,15 +65,19 @@ class SDLCCrewManager:
         tasks_list = []
 
         # 1. Requirement Task
+        srs_path = os.path.join(self.reports_dir, "SRS.md")
+        existing_srs = read_file(srs_path) if os.path.exists(srs_path) else "No existing SRS."
         req_desc = req_agent_wrapper.get_task_description("requirement_task").format(
             prompt=prompt,
-            reports_dir=self.reports_dir
+            reports_dir=self.reports_dir,
+            existing_srs=existing_srs
         )
         req_expected = req_agent_wrapper.get_task_expected_output("requirement_task")
         req_task = Task(
             description=req_desc,
             expected_output=req_expected,
-            agent=req_agent
+            agent=req_agent,
+            output_file=srs_path
         )
         tasks_list.append(req_task)
 
@@ -103,7 +107,8 @@ class SDLCCrewManager:
             impact_task = Task(
                 description=impact_desc,
                 expected_output=impact_expected,
-                agent=impact_agent
+                agent=impact_agent,
+                output_file=os.path.join(self.reports_dir, "Impact_Report.md")
             )
             tasks_list.append(impact_task)
 
@@ -116,7 +121,8 @@ class SDLCCrewManager:
         design_task = Task(
             description=design_desc,
             expected_output=design_expected,
-            agent=design_agent
+            agent=design_agent,
+            output_file=os.path.join(self.reports_dir, "Design.md")
         )
         tasks_list.append(design_task)
 
@@ -190,6 +196,9 @@ class SDLCCrewManager:
         result = crew.kickoff()
         print("SDLC Crew run complete.")
 
+        # Post-process: Classify and tag requirements incrementally
+        self._classify_and_tag_requirements(srs_path, existing_srs)
+
         # Update registry and log runs
         self._update_db_registry_and_run(mode)
         return result
@@ -235,3 +244,65 @@ class SDLCCrewManager:
         status = "success" if os.path.exists(srs_path) else "failed"
         self.db.log_run(self.project_id, srs_hash, design_hash, status)
         print(f"Logged SDLC run state in SQLite for project ID {self.project_id}.")
+
+    def _classify_and_tag_requirements(self, srs_path: str, existing_srs_content: str):
+        """Clean the draft SRS and run an LLM call to compare old and new requirements, classifying them."""
+        if not os.path.exists(srs_path):
+            return
+        
+        new_srs_content = read_file(srs_path)
+        
+        # Build prompt for requirements comparison & tagging
+        prompt = f"""
+You are an expert systems analyst. Your job is to compare the historical Software Requirements Specification (SRS) with the new updated draft SRS, merge them, and output a clean, final Software Requirements Specification (SRS) in markdown format.
+
+Here is the previous/historical SRS:
+\"\"\"
+{existing_srs_content}
+\"\"\"
+
+Here is the new updated draft SRS:
+\"\"\"
+{new_srs_content}
+\"\"\"
+
+For EVERY single functional and non-functional requirement listed in the final merged list, you MUST classify it into one of these categories and prefix it with the exact tag:
+- [NEW]: If the requirement was newly added in the updated draft.
+- [MODIFIED]: If the requirement existed in the historical SRS but was updated or modified.
+- [REMOVED]: If the requirement existed in the historical SRS but is no longer present in the updated draft. You must include it in the final list but prefix it with [REMOVED].
+- [UNCHANGED]: If the requirement existed in the historical SRS and remains exactly the same.
+
+Format the output as a valid markdown document starting with:
+# Software Requirements Specification (SRS)
+
+Under the 'Functional Requirements' section, ensure that every requirement item is prefixed with its classification tag. Example:
+- [UNCHANGED] The system shall support addition.
+- [NEW] The system shall support modulo calculation.
+- [REMOVED] The system shall support legacy division.
+
+Do NOT include any conversational intro, explanation, or outro. Do NOT wrap the markdown output in triple backticks (e.g. do not wrap in markdown tags). Just output the raw markdown text starting with '# Software Requirements Specification (SRS)'.
+"""
+        try:
+            # Get LLM instance
+            from agents.base_agent import BaseAgent
+            req_agent_wrapper = BaseAgent("requirement_agent")
+            llm = req_agent_wrapper.llm
+            
+            # Invoke LLM
+            response_text = llm.call([{"role": "user", "content": prompt}])
+            
+            # Clean up output if wrapped in backticks
+            response_text = response_text.strip()
+            if response_text.startswith("```"):
+                lines = response_text.splitlines()
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines and lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                response_text = "\n".join(lines).strip()
+            
+            # Write back
+            write_file(srs_path, response_text)
+            print(f"Successfully classified and updated requirements in {srs_path}")
+        except Exception as e:
+            print(f"Warning: Failed to classify requirements via LLM call: {e}")

@@ -41,7 +41,9 @@ class BaseAgent:
             llm = LLM(
                 model=model_name,
                 base_url=base_url,
-                temperature=0.2
+                temperature=0.2,
+                timeout=1800,
+                max_tokens=3000
             )
             # Override supports_function_calling to return False for Ollama.
             # Small local models fail or return empty responses when native tools are enabled.

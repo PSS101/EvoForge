@@ -1,35 +1,48 @@
 requirement_task:
   description: >
-    Analyze the user prompt: "{prompt}".
-    Also check if there is an existing SRS.md. If there is, merge the new requirements into the existing SRS.md, updating sections, extending features, and preserving unchanged requirements.
-    Generate/update the file `SRS.md` in the reports/project directory: {reports_dir}/SRS.md.
-    Ensure it includes a clear Title, Version, Introduction, Functional Requirements, Non-Functional Requirements, and System Scope/Flow.
+    Analyze the new user requirements prompt: "{prompt}".
+    Compare these new requirements with the existing SRS:
+    "{existing_srs}"
+    
+    You MUST merge the new requirements, features, and changes from the user prompt into the existing SRS.
+    For every single requirement (functional and non-functional), classify it into one of these categories:
+    - [NEW]: Added by the current prompt.
+    - [MODIFIED]: Modified or updated from the existing SRS by the current prompt.
+    - [REMOVED]: Existed in the previous SRS but is now deprecated, obsolete, or explicitly deleted by the current prompt.
+    - [UNCHANGED]: Exists in the previous SRS and is untouched by the current prompt.
+    
+    Format the requirement list clearly, prefixing each requirement with its classification tag (e.g., "- [UNCHANGED] The system shall...").
+    If a requirement is [REMOVED], keep it in the list but mark it clearly as [REMOVED] so that downstream agents know it was deleted.
+    
+    You MUST output the entire updated markdown content of the SRS.md file.
+    Do NOT output any conversational text, explanations, intro, outro, or markdown code blocks (e.g. do not wrap the output in ```markdown). Output ONLY the raw markdown of the file itself.
   expected_output: >
-    A comprehensive SRS.md file containing structured functional and non-functional specifications.
+    The complete, raw markdown content of the updated SRS.md file containing the classified requirement lists. Absolutely no conversational filler, no code block backticks, just the raw file content.
 
 impact_task:
   description: >
-    Compare the newly updated SRS.md at {reports_dir}/SRS.md with the historical SRS state/hashes or previous version.
-    Analyze how the requirements delta impacts the existing codebase files: {existing_files_summary}.
-    Generate `Impact_Report.md` at {reports_dir}/Impact_Report.md.
-    Detail:
+    Compare the newly updated SRS.md with the historical files: {existing_files_summary}.
+    Analyze how the requirements delta impacts the existing codebase.
+    Generate an Impact_Report.md detailing:
     1. Requirement Delta (what's new, changed, or removed).
     2. File Impact list (categorized into NEW, MODIFY, UNCHANGED).
     3. Precise refactoring/addition guidelines for the Development Agent, highlighting that unchanged files should NOT be touched.
+    Do NOT wrap the output in markdown code blocks or add conversational preamble. Output ONLY the raw markdown content of the Impact_Report.md file.
   expected_output: >
-    An Impact_Report.md file listing requirement changes and identifying which source/test/documentation files must be created, modified, or left alone.
+    The complete, raw markdown content of the Impact_Report.md file. Absolutely no conversational filler, no code block backticks, just the raw file content.
 
 design_task:
   description: >
-    Review the SRS.md at {reports_dir}/SRS.md and the Impact_Report.md (if any) at {reports_dir}/Impact_Report.md.
-    Generate or update the `Design.md` at {reports_dir}/Design.md.
+    Review the SRS.md and the Impact_Report.md (if any).
+    Generate or update the Design.md file.
     Outline:
     1. System Architecture overview.
     2. Module and Class Specifications (class names, methods, signatures, docstrings).
     3. Structural & Sequence flow (represented using Mermaid diagrams).
     Keep it strictly synchronized with the functional requirements and impact directions.
+    Do NOT wrap the output in markdown code blocks or add conversational preamble. Output ONLY the raw markdown content of the Design.md file.
   expected_output: >
-    A clear Design.md file detailing the architectural design, class structures, and database/file layouts.
+    The complete, raw markdown content of the Design.md file. Absolutely no conversational filler, no code block backticks, just the raw file content.
 
 code_task:
   description: >
