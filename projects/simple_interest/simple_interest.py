@@ -248,10 +248,83 @@ class CalculatorUI:
             except Exception as e:
                 messagebox.showerror("Error", f"Could not save PDF file: {e}")
 
+def run_cli(args):
+    try:
+        p = args.principal
+        r = args.rate
+        t = args.time
+        
+        if p is None:
+            p = float(input("Enter Principal Amount ($): "))
+        if r is None:
+            r = float(input("Enter Rate of Interest (%): "))
+        if t is None:
+            t = float(input("Enter Time Period (Years): "))
+            
+        if p < 0 or r < 0 or t < 0:
+            raise ValueError("All inputs must be non-negative values.")
+            
+        interest = CalculatorMath.calculate_simple_interest(p, r, t)
+        total = p + interest
+        
+        print("\n=== Simple Interest Calculation Result ===")
+        print(f"Principal Amount: ${p:,.2f}")
+        print(f"Annual Interest Rate: {r:.2f}%")
+        print(f"Time Period: {t:.2f} years")
+        print(f"-----------------------------------------")
+        print(f"Calculated Simple Interest: ${interest:,.2f}")
+        print(f"Total Amount (Principal + Interest): ${total:,.2f}")
+        print("=========================================\n")
+        
+        output_path = args.output
+        if not output_path:
+            save_choice = input("Do you want to save the reports? (y/n): ").strip().lower()
+            if save_choice == 'y':
+                output_path = input("Enter output filename/path (without extension): ").strip()
+                
+        if output_path:
+            txt_path = output_path + ".txt"
+            pdf_path = output_path + ".pdf"
+            DataStorage.store_result_text(txt_path, p, r, t, interest)
+            DataStorage.store_result_pdf(pdf_path, p, r, t, interest)
+            print(f"Saved text report to: {txt_path}")
+            print(f"Saved PDF report to: {pdf_path}")
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+def run_interactive_cli():
+    class Args:
+        cli = True
+        principal = None
+        rate = None
+        time = None
+        output = None
+    run_cli(Args())
+
 def main():
-    root = tk.Tk()
-    app = CalculatorUI(root)
-    root.mainloop()
+    import argparse
+    parser = argparse.ArgumentParser(description="Simple Interest Calculator")
+    parser.add_argument("--cli", action="store_true", help="Run in interactive CLI mode instead of GUI")
+    parser.add_argument("-p", "--principal", type=float, help="Principal amount")
+    parser.add_argument("-r", "--rate", type=float, help="Annual interest rate (%)")
+    parser.add_argument("-t", "--time", type=float, help="Time period (years)")
+    parser.add_argument("-o", "--output", help="Base file path to save TXT and PDF reports (e.g., report)")
+    
+    args = parser.parse_args()
+    
+    if args.cli or args.principal is not None or args.rate is not None or args.time is not None:
+        run_cli(args)
+    else:
+        try:
+            # Check if DISPLAY or window environment is available
+            root = tk.Tk()
+            app = CalculatorUI(root)
+            root.mainloop()
+        except Exception:
+            print("Could not initialize GUI. Falling back to interactive CLI mode.")
+            run_interactive_cli()
 
 if __name__ == "__main__":
     main()
