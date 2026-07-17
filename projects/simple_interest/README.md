@@ -20,9 +20,29 @@ projects/simple_interest/
 ```
 
 ## Setup & Running
-To launch the application:
+The application supports multiple execution modes:
+
+### 1. Graphical User Interface (GUI) Mode
+Launches a visual interface (Tkinter window) for inputting values:
 ```bash
 python simple_interest.py
+```
+
+### 2. Interactive CLI Mode
+Prompts you for inputs step-by-step in the terminal (runs completely offline):
+```bash
+python simple_interest.py --cli
+```
+
+### 3. CLI Argument Mode
+Directly computes interest using command-line arguments:
+```bash
+python simple_interest.py -p 1000 -r 5 -t 2
+```
+
+To automatically save TXT and PDF reports:
+```bash
+python simple_interest.py -p 1000 -r 5 -t 2 -o my_report
 ```
 
 ## Running Tests
