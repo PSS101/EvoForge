@@ -5,9 +5,10 @@ from calculator import get_history
 def main():
     print("Simple Calculator Command-Line Utility")
     print("Type 'h' to view history, 'q' to quit.")
+    print("Operations: +, -, *, /, %, s (sqrt)")
     while True:
         try:
-            choice = input("Enter operation (+, -, *, /, %): ").strip()
+            choice = input("Enter operation (+, -, *, /, %, s): ").strip()
             if choice.lower() == 'q':
                 break
             if choice.lower() == 'h':
@@ -27,6 +28,15 @@ def main():
                 num1, num2 = map(float, num_input)
                 result = perform_operation(choice, num1, num2)
                 print(f"{num1} {choice} {num2} = {result}")
+            elif choice == 's':
+                num_input = input("Enter one number: ").strip()
+                try:
+                    num = float(num_input)
+                except ValueError:
+                    print("Error: Please enter a valid number.")
+                    continue
+                result = perform_operation(choice, num, None)
+                print(f"sqrt({num}) = {result}")
             else:
                 print("Invalid operation. Please try again.")
         except ValueError as ve:

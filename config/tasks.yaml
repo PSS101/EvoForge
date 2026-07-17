@@ -33,7 +33,7 @@ impact_task:
 
 design_task:
   description: >
-    Review the SRS.md and the Impact_Report.md (if any).
+    Review the SRS.md and the Requirement_Delta_Report.md (if any).
     Generate or update the Design.md file.
     Outline:
     1. System Architecture overview.
@@ -46,13 +46,15 @@ design_task:
 
 code_task:
   description: >
-    Write, modify, or extend Python source code based on Design.md at {reports_dir}/Design.md and Impact_Report.md at {reports_dir}/Impact_Report.md.
+    Write, modify, or extend Python source code based on Design.md at {reports_dir}/Design.md and the requirement delta at {delta_report_path}.
     The project codebase is located at: {project_dir}.
+    Use the static dependency graph at {dependency_graph_path} and reuse guidance at {reuse_report_path} to minimize changes.
     Follow these rules strictly:
     1. Review existing code files: {existing_source_code}.
-    2. Only write new files or modify files marked for modification in the Impact_Report.md. Do NOT overwrite unchanged files.
-    3. Maintain PEP-8 formatting, clear docstrings, and write modular, readable code.
-    4. You MUST use the `write_project_file` tool to save each new or modified Python source file to `{project_dir}`. Do NOT just present the code in your final answer; you MUST write it to the filesystem.
+    2. Prefer reusing existing modules, classes, and functions when they satisfy new or modified requirements.
+    3. Only write new files or modify files marked for modification by the requirement delta and reuse reports. Do NOT overwrite unchanged files.
+    4. Preserve architecture, naming conventions, imports, and coding style.
+    5. You MUST use the `write_project_file` tool to save each new or modified Python source file to `{project_dir}`. Do NOT just present the code in your final answer; you MUST write it to the filesystem.
   expected_output: >
     Complete, functional, and syntactically correct Python files in the {project_dir} directory.
 
@@ -69,6 +71,7 @@ testing_task:
 documentation_task:
   description: >
     Review the project source code in {project_dir}, the SRS.md at {reports_dir}/SRS.md, and the Design.md at {reports_dir}/Design.md.
+    Update only the documentation that corresponds to modified APIs, workflows, or architecture changes.
     Create or update:
     1. {project_dir}/README.md: Installation guides, usage examples, feature list, and test runner instructions.
     2. {project_dir}/User_Manual.md: Detailed manual detailing how a user interacts with the app, with command-line or interface examples.

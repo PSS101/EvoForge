@@ -7,9 +7,21 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from agents.sdlc_crew import SDLCCrewManager
-from agents.base_agent import BaseAgent
+# Lazy/defensive imports to allow running without crewai installed (fallback mode)
+try:
+    from agents.base_agent import BaseAgent
+except Exception:
+    BaseAgent = None
+try:
+    from crewai import Agent, Task, Crew, Process
+    HAS_CREW = True
+except Exception:
+    Agent = None
+    Task = None
+    Crew = None
+    Process = None
+    HAS_CREW = False
 from database.db_manager import DBManager
-from crewai import Agent, Task, Crew, Process
 import json
 import re
 import subprocess

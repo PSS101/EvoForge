@@ -5,7 +5,13 @@ from dotenv import load_dotenv
 # Load environment variables from .env first before importing crewai
 load_dotenv()
 
-from crewai import Agent
+# Defensive import: prefer crewai.Agent if available, otherwise provide a local fallback
+try:
+    from crewai import Agent
+    HAS_CREW = True
+except Exception:
+    Agent = None
+    HAS_CREW = False
 
 class BaseAgent:
     def __init__(self, agent_name: str):
@@ -30,26 +36,45 @@ class BaseAgent:
 
         # 1. Ollama Provider
         if llm_provider == "ollama":
-            from crewai import LLM
-            ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
-            if not ollama_model.startswith("ollama/"):
-                model_name = f"ollama/{ollama_model}"
-            else:
-                model_name = ollama_model
-            
-            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-            llm = LLM(
-                model=model_name,
-                base_url=base_url,
-                temperature=0.2,
-                timeout=1800,
-                max_tokens=3000
-            )
-            # Override supports_function_calling to return False for Ollama.
-            # Small local models fail or return empty responses when native tools are enabled.
-            # Forcing ReAct text tool calling resolves these failures.
-            llm.supports_function_calling = lambda: False
-            return llm
+            # Prefer crewai's LLM wrapper if available
+            try:
+                if HAS_CREW:
+                    from crewai import LLM
+                    ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
+                    if not ollama_model.startswith("ollama/"):
+                        model_name = f"ollama/{ollama_model}"
+                    else:
+                        model_name = ollama_model
+                    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+                    llm = LLM(
+                        model=model_name,
+                        base_url=base_url,
+                        temperature=0.2,
+                        timeout=1800,
+                        max_tokens=3000
+                    )
+                    llm.supports_function_calling = lambda: False
+                    return llm
+            except Exception:
+                pass
+
+            # Fallback: simple Ollama runner using the local 'ollama' CLI (must be installed)
+            class OllamaClient:
+                def __init__(self, model_name=None, base_url=None, temperature=0.2):
+                    self.model = model_name or os.getenv("OLLAMA_MODEL", "gemma3:1b")
+                    self.base_url = base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+                    self.temperature = temperature
+
+                def generate(self, prompt: str) -> str:
+                    import subprocess, shlex
+                    cmd = ["ollama", "run", self.model, "--quiet", "--prompt", prompt]
+                    try:
+                        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                        return res.stdout.strip()
+                    except Exception as e:
+                        return f"ERROR_RUNNING_OLLAMA: {e}"
+
+            return OllamaClient()
 
         # 2. OpenAI Provider
         elif llm_provider == "openai" or (not llm_provider and openai_key and not gemini_key):
@@ -92,21 +117,48 @@ class BaseAgent:
                     "or set API keys for GEMINI_API_KEY or OPENAI_API_KEY."
                 )
 
-    def get_agent(self, tools=None) -> Agent:
+    def get_agent(self, tools=None):
         config = self.agent_config.get(self.agent_name)
         if not config:
             raise ValueError(f"Agent '{self.agent_name}' config not found in agents.yaml")
-        
-        return Agent(
-            role=config["role"],
-            goal=config["goal"],
-            backstory=config["backstory"],
-            llm=self.llm,
-            tools=tools or [],
-            verbose=True,
-            allow_delegation=False,
-            max_iter=5
-        )
+
+        # If crewai.Agent is available, construct it
+        if HAS_CREW and Agent is not None:
+            return Agent(
+                role=config["role"],
+                goal=config["goal"],
+                backstory=config["backstory"],
+                llm=self.llm,
+                tools=tools or [],
+                verbose=True,
+                allow_delegation=False,
+                max_iter=5
+            )
+
+        # Fallback: simple local agent that uses the LLM client created in _init_llm
+        class LocalAgent:
+            def __init__(self, role, goal, backstory, llm_client):
+                self.role = role
+                self.goal = goal
+                self.backstory = backstory
+                self.llm = llm_client
+
+            def run(self, prompt: str) -> str:
+                # Use the underlying llm client to generate a response
+                try:
+                    # OllamaClient defines .generate
+                    if hasattr(self.llm, 'generate'):
+                        return self.llm.generate(prompt)
+                    # LangChain/Chat models can be called differently — attempt .generate_prompt or __call__
+                    if hasattr(self.llm, '__call__'):
+                        return str(self.llm(prompt))
+                    if hasattr(self.llm, 'generate'):
+                        return str(self.llm.generate(prompt))
+                except Exception as e:
+                    return f"LOCAL_AGENT_ERROR: {e}"
+                return ""
+
+        return LocalAgent(config["role"], config["goal"], config["backstory"], self.llm)
 
     def get_task_description(self, task_name: str) -> str:
         config = self.task_config.get(task_name)
