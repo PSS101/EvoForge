@@ -1,0 +1,74 @@
+[
+  {
+    "file_path": "test_queue_c.h",
+    "name": "test_queue_c_init",
+    "return_type": "void",
+    "params": [
+      "Test_queue_c *m"
+    ],
+    "signature": "void test_queue_c_init(Test_queue_c *m)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_queue_c.h",
+    "name": "test_queue_c_add_entry",
+    "return_type": "bool",
+    "params": [
+      "Test_queue_c *m",
+      "double val"
+    ],
+    "signature": "bool test_queue_c_add_entry(Test_queue_c *m, double val)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_queue_c.h",
+    "name": "test_queue_c_count",
+    "return_type": "size_t",
+    "params": [
+      "const Test_queue_c *m"
+    ],
+    "signature": "size_t test_queue_c_count(const Test_queue_c *m)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_queue_c.c",
+    "name": "test_queue_c_init",
+    "return_type": "void",
+    "params": [
+      "Test_queue_c *m"
+    ],
+    "signature": "void test_queue_c_init(Test_queue_c *m)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_queue_c.c",
+    "name": "test_queue_c_add_entry",
+    "return_type": "bool",
+    "params": [
+      "Test_queue_c *m",
+      "double val"
+    ],
+    "signature": "bool test_queue_c_add_entry(Test_queue_c *m, double val)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_queue_c.c",
+    "name": "test_queue_c_count",
+    "return_type": "size_t",
+    "params": [
+      "const Test_queue_c *m"
+    ],
+    "signature": "size_t test_queue_c_count(const Test_queue_c *m)",
+    "is_core": 1
+  },
+  {
+    "file_path": "main.c",
+    "name": "main",
+    "return_type": "int",
+    "params": [
+      "void"
+    ],
+    "signature": "int main(void)",
+    "is_core": 0
+  }
+]

@@ -1,0 +1,84 @@
+# Reuse Decision Report
+
+## Reusable Components Detected
+
+No reusable classes or functions were detected in the existing project.
+
+## Reuse Decisions
+
+- [NEW] `[NEW] The purpose of this Software Requirements Specification (SRS) is to define the functional and non‑functional requirements for a Python implementation of an AVL (Adelson‑Velsky and Landis) self‑balancing binary search tree. The system shall provide efficient, reliable, and maintainable operations for insertion, deletion, searching, and traversal while maintaining strict balance properties.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] The envisioned product is a reusable Python library that can be integrated into larger applications requiring ordered data structures with guaranteed logarithmic time complexity for core operations. It should expose a clean API, support serialization/deserialization, and provide diagnostic information for debugging and monitoring.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] This product is an independent module that will be packaged as a pip‑installable library (`avl_tree`). It will depend only on the Python Standard Library (Python ≥ 3.8). The library will not interact with external services or databases; persistence, if required, will be handled by client code through serialization.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **Software Engineers**: Developers who need a balanced binary search tree for in‑memory data structures.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **Data Scientists**: Users requiring efficient sorted collections for algorithmic tasks.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **Educators/Students**: Individuals learning about self‑balancing trees and their properties.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Term | Definition |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] |------|------------|` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | AVL Tree | A binary search tree that maintains a balance factor of −1, 0, or +1 for every node. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Node | An element in the tree containing a key, optional value, left and right child references, height, and balance factor. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Balance Factor | The difference between the heights of the left and right subtrees of a node. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Rotation | A local restructuring operation (left or right) that restores balance after insertions or deletions. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | API | Application Programming Interface – the set of functions exposed to client code. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | CLI | Command Line Interface – optional interactive shell for testing. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] ISO/IEC/IEEE 29148:2018 – Software Requirements Specification.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] Python 3.8+ Documentation – https://docs.python.org/3/` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] PEP 8 – Style Guide for Python Code (for maintainability considerations).` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] JSON 1.0 Specification – https://www.json.org/json-en.html (serialization format).` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The system shall provide a command‑line interface (`avl_cli.py`) that allows users to perform insert, delete, search, and traversal operations interactively.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The CLI shall display clear prompts, accept user input, and present results in a human‑readable format.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The library shall expose the following public functions:` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] `insert(key: Any) -> None`` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] `delete(key: Any) -> None`` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] `search(key: Any) -> Optional[Any]`` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] `inorder_traversal() -> List[Any]`` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] `preorder_traversal() -> List[Any]`` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] `postorder_traversal() -> List[Any]`` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] `serialize() -> str` (JSON string)` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] `deserialize(json_str: str) -> None`` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** All API functions shall raise a `ValueError` if the input key is not comparable to existing keys.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The CLI shall map user commands (`insert`, `delete`, `search`, `inorder`, `preorder`, `postorder`, `serialize`, `deserialize`) to the corresponding API calls.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Serialization output shall be a JSON array of objects, each representing a node with fields: `key`, `value` (optional), `left`, `right`. The structure must preserve tree topology.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Deserialization shall accept the same JSON format and reconstruct an AVL tree with identical structure and balance properties.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The system shall allow insertion of a key (and optional value) into the AVL tree while maintaining balance.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The system shall allow deletion of a key from the AVL tree while maintaining balance.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The system shall support searching for a key and return its associated value if present, or indicate absence.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The system shall provide inorder, preorder, and postorder traversal methods returning lists of keys in the respective order.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** For `insert`, if the key already exists, the system shall update its value without altering tree structure.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** For `delete`, if the key does not exist, the system shall raise a `KeyError` with an informative message.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** All public functions shall validate that input keys are of comparable types; otherwise, they shall raise a `TypeError`.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The CLI shall handle invalid commands gracefully by displaying usage information.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** After each insertion or deletion, the system shall recompute node heights and balance factors up to the root.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Rotations (single left/right, double left‑right, double right‑left) shall be performed as needed to restore AVL balance.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The library shall expose a `get_height()` method returning the height of the tree.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The library shall expose a `is_balanced()` method that verifies all nodes satisfy the AVL balance factor constraint.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Insertion, deletion, and search operations shall have worst‑case time complexity O(log n), where n is the number of nodes.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Traversal methods shall operate in O(n) time.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The system shall not lose data during normal operation; all modifications must be immediately reflected in subsequent operations.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** In the event of an exception, the tree shall remain in a consistent state (no partial updates).` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Code documentation shall follow PEP 257 docstring conventions for all public functions and classes.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The library shall be structured into modules: `node.py`, `avl_tree.py`, `cli.py`.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Input validation shall prevent injection of malicious data that could corrupt the tree structure.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Unit tests shall cover at least 90 % code coverage for core functionality.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** The library shall be compatible with Python ≥ 3.8 and must not use external dependencies beyond the Standard Library.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** Memory usage shall be O(n) for storing n nodes; no additional large data structures are permitted during operations.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **[NEW]** All public methods shall return promptly, ensuring that no single operation exceeds 100 ms on typical hardware for trees up to 10⁶ nodes.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Requirement | Verification Method | Acceptance Criterion |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] |-------------|----------------------|----------------------|` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Insertion maintains AVL balance | Unit test: insert sequence of random keys, then call `is_balanced()` | Returns True |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Deletion maintains AVL balance | Unit test: delete random keys, then call `is_balanced()` | Returns True |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Search returns correct value | Unit test: search for inserted keys and verify returned values | Matches expected |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Duplicate key updates value | Unit test: insert key twice with different values, then search | Value equals last inserted |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Delete non‑existent key raises KeyError | Unit test: delete absent key | Raises KeyError |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Serialization/Deserialization preserves structure | Unit test: serialize tree, deserialize into new instance, compare traversals | Traversal lists identical |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Performance O(log n) for operations | Benchmark test: insert 10⁶ keys, measure average operation time | < 100 ms per operation |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Memory usage O(n) | Profiling test: monitor memory after inserting n nodes | Memory ≈ constant × n |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | CLI handles invalid commands | Integration test: feed invalid command to CLI, capture output | Displays help message |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **AVL Tree** – Self‑balancing binary search tree.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **Node Height** – Length of the longest path from a node to a leaf.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] **Balance Factor** – Difference between left and right subtree heights.` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Assumption | Rationale |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] |------------|-----------|` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Keys are comparable using `<` and `==`. | Required for binary search tree ordering. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Duplicate keys are allowed only as updates, not as separate nodes. | Simplifies balancing logic. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] | Serialization format is JSON; clients will handle persistence if needed. | Keeps library lightweight. |` requires new implementation. No strong reusable component found.
+- [NEW] `[NEW] ---` requires new implementation. No strong reusable component found.

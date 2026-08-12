@@ -1,0 +1,183 @@
+================================================================================
+           EVOFORGE AUTONOMOUS SDLC AGENT: DETAILED FLOW & WORKING SPECIFICATION
+================================================================================
+
+1. OVERVIEW & SYSTEM ARCHITECTURE
+--------------------------------------------------------------------------------
+EvoForge is an autonomous, multi-agent Software Development Lifecycle (SDLC) 
+framework. It transforms high-level natural language requirements into fully 
+engineered, verified, compiled, and version-controlled software projects in 
+Python, C, or C++.
+
+The system uses a 5-stage pipeline driven by specialized CrewAI / LLM agents:
+  • Stage 0: Autonomous Triage & Language Detection
+  • Stage 1: Requirements Analysis & Specification Synthesis (IEEE 830 / ISO 29148)
+  • Stage 2: Architecture, Dependency Graph & Asset Reuse Modeling
+  • Stage 3: Automated Code Engineering & Self-Correction Compilation Loop
+  • Stage 4: Test Suite Synthesis, Execution & Automated Bug Debugging
+  • Stage 5: Documentation, Database Versioning & Git Deployment
+
+
+2. DETAILED STAGE-BY-STAGE EXECUTION FLOW
+--------------------------------------------------------------------------------
+
+[STAGE 0: AUTONOMOUS TRIAGE & SCOPE CLASSIFICATION]
+  File: main.py -> autonomous_triage()
+  
+  1. Prompt Input: User provides a prompt (e.g., "Create an AVL tree with insertion").
+  2. Language Detection:
+     - Scans prompt keywords via tools/language_tools.py.
+     - Detects target runtime: 'python', 'c', or 'cpp'.
+     - Preserves existing language if evolving an existing project (.evoforge_lang).
+  3. Portfolio Query:
+     - Queries SQLite database (database/project_state.db) and projects/ directory.
+  4. Project Triage (LLM / Heuristic Classifier):
+     - Determines project slug name (snake_case, e.g. "avl").
+     - Determines execution mode:
+       * 'new': Greenfield project initialization.
+       * 'evolve': Incremental requirement update on an existing project.
+
+--------------------------------------------------------------------------------
+
+[STAGE 1: REQUIREMENTS ANALYSIS & SPECIFICATION SYNTHESIS]
+  File: agents/sdlc_crew.py -> _run_requirement_stage()
+  Agent: requirement_agent (Role: Lead Software Requirements Engineer)
+  Task: requirement_task (Configured in config/tasks.yaml & config/agents.yaml)
+
+  1. Existing SRS Loading:
+     - Reads previous SRS.md from reports/<project_name>/SRS.md if in 'evolve' mode.
+  2. Agent Execution:
+     - Synthesizes IEEE 830 compliant Software Requirements Specification (SRS.md).
+     - Categorizes every single functional requirement line using tags:
+         [- [NEW]: Requirement added in this iteration]
+         [- [MODIFIED]: Modified requirement]
+         [- [REMOVED]: Deprecated requirement]
+         [- [UNCHANGED]: Touchless historical requirement]
+  3. Requirement Delta Classification:
+     - Runs tools/requirement_tools.py -> classify_requirements().
+     - Outputs reports/<project_name>/SRS.md and Requirement_Delta_Report.md.
+     - Persists SRS version to SQLite database via DBManager.store_srs_version().
+
+--------------------------------------------------------------------------------
+
+[STAGE 2: ARCHITECTURE & DEPENDENCY MODELING]
+  File: agents/sdlc_crew.py -> Stage 2 logic
+  Agent: design_agent (Role: Lead Software Architect) & impact_agent
+
+  1. Static Dependency Graph Generation:
+     - Runs tools/static_analysis.py -> build_dependency_graph().
+     - Scans source and header files, parsing imports/includes to build a JSON tree.
+     - Saves reports/<project_name>/Dependency_Graph.json.
+  2. Asset Reuse Analysis:
+     - Runs tools/reuse_tools.py -> generate_reuse_decision_report().
+     - Compares newly synthesized SRS against existing codebase AST/symbols.
+     - Determines which classes/functions can be reused touchlessly vs modified.
+     - Saves reports/<project_name>/Reuse_Decision_Report.md.
+  3. Test Impact Mapping:
+     - Runs tools/impact_tools.py -> generate_test_impact_report().
+     - Maps changed modules to specific test runner files.
+     - Saves reports/<project_name>/Test_Impact_Report.md.
+  4. Design Document Synthesis:
+     - Runs _run_design_stage() using design_agent.
+     - Generates reports/<project_name>/Design.md including:
+       * Decoupled system architecture layers.
+       * Class/struct contracts, function signatures, docstrings.
+       * Mermaid sequence flow diagrams (User -> CLI Main -> Core Service).
+
+--------------------------------------------------------------------------------
+
+[STAGE 3: AUTOMATED CODE ENGINEERING & VALIDATION LOOP]
+  File: agents/sdlc_crew.py -> _run_single_stage("code_task")
+  Agent: code_agent (Python) / c_code_agent (C/C++)
+
+  1. Code File Prompting:
+     - Sinks SRS.md and Design.md into the agent prompt context.
+     - Instructs model to output modular source files using standard file blocks:
+         --- FILE: relative/path ---
+         ```language
+         <code>
+         ```
+  2. Multi-Attempt Syntax & Compiler Validation Loop (Max Retries: 3):
+     For attempt 1 to max_attempts:
+       a. Extract File Map: Parses structured files using regex patterns.
+       b. Validation Pass (_validate_syntax):
+          - Python: Runs ast.parse() syntax validation & undefined class check.
+          - C/C++: 
+            * Writes code to isolated temporary build directory.
+            * Pre-compilation Auto-Repair (debug_c_project): Injects missing headers
+              (<iostream>, <vector>, <string>, <memory>, <limits.h>, <stdbool.h>),
+              fixes missing include guards, and strips dynamic throw() specs.
+            * Auto-Generates Makefile (generate_makefile).
+            * Compiles using GCC/G++ (compile_project).
+            * Executes semantic requirement coverage scoring (evaluate_project_semantics).
+       c. Feedback Loop:
+          - If validation succeeds: Writes validated files to projects/<project_name>/ and breaks loop.
+          - If validation fails: Extracts exact compiler error lines (file:line:error)
+            and re-prompts model with error traceback for targeted self-correction.
+  3. Deterministic Fallback Guard:
+     - If all LLM validation retries fail and no code map can be extracted, EvoForge
+       invokes _generate_c_code() / _generate_python_code() fallback engines.
+     - Fallbacks dynamically generate domain-specific modules (Math Engine, Container 
+       Data Structures, or Session Handlers) matching prompt keywords.
+
+--------------------------------------------------------------------------------
+
+[STAGE 4: TEST SUITE SYNTHESIS & AUTOMATED DEBUGGING]
+  File: agents/sdlc_crew.py -> _run_testing_stage()
+  Agent: testing_agent / c_testing_agent
+
+  1. Test Generation:
+     - Inspects header/module signatures in the project.
+     - Generates pytest files (tests/test_*.py) for Python or non-interactive assertion
+       runner (tests/test_runner.c / test_runner.cpp) for C/C++.
+     - Validates test runner compilation and assertion execution.
+  2. Verification Pass (main.py -> execute_pipeline):
+     - C/C++:
+       * Generates fresh Makefile auto-detecting all subdirectories and main files.
+       * Runs 'make all' to verify primary build binary.
+       * Runs 'make test' to verify unit test runner execution.
+       * If compilation or test fails: Executes automated debugging pass (debug_c_project).
+     - Python:
+       * Executes pytest on project/tests using sys.executable with isolated PYTHONPATH.
+
+--------------------------------------------------------------------------------
+
+[STAGE 5: DOCUMENTATION, DATABASE VERSIONING & GIT DEPLOYMENT]
+  File: main.py & agents/sdlc_crew.py
+
+  1. Documentation Synthesis:
+     - Generates projects/<project_name>/README.md (build, run, test commands).
+     - Generates projects/<project_name>/User_Manual.md (CLI walkthrough & menus).
+  2. Database Registry Persistence:
+     - Updates SQLite database (database/project_state.db):
+       * Registers project metadata in projects table.
+       * Stores file metadata (paths, hashes, sizes) in project_files table.
+       * Logs execution history in pipeline_runs table.
+  3. Automated Git Deployment:
+     - If all verification tests pass:
+       * Stages projects/<project_name> and reports/<project_name>.
+       * Commits changes: "auto(sdlc): update <project_name> autonomously".
+       * Pushes to remote Git repository.
+
+
+3. KEY REPAIR & STABILITY MECHANISMS
+--------------------------------------------------------------------------------
+1. Dynamic Main Symbol Exclusion:
+   The Makefile generator (tools/build_tools.py) dynamically scans source files for 
+   'int main(' and excludes those object files from 'TEST_TARGET' linking. This 
+   prevents duplicate 'main' linker errors when entry files are named main.cpp, 
+   cli.cpp, or app.c.
+
+2. C Module Function Prefixing Rule:
+   System prompts enforce that C functions use module prefixes (e.g., avl_remove, 
+   queue_push). This eliminates global namespace collisions with standard C library 
+   functions declared in <stdio.h> or <unistd.h> (e.g. remove, read, write, log).
+
+3. Strict Language Header Isolation:
+   Static bug analyzer (tools/build_tools.py) segregates C++ STL headers (<vector>, 
+   <string>, <algorithm>, <iostream>) to .cpp/.hpp files, preventing fatal 
+   "No such file or directory" errors in C11 gcc builds.
+
+================================================================================
+                 END OF EVOFORGE AGENT FLOW SPECIFICATION
+================================================================================

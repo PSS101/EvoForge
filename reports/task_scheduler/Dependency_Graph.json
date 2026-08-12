@@ -1,0 +1,1561 @@
+{
+  "modules": {
+    "utils.py": {
+      "imports": [],
+      "api_dependencies": [],
+      "definitions": {
+        "functions": [
+          {
+            "name": "input_int",
+            "args": [
+              "prompt"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "input_str",
+            "args": [
+              "prompt"
+            ],
+            "docstring": ""
+          }
+        ],
+        "classes": []
+      },
+      "call_edges": [
+        {
+          "caller": "input_str",
+          "callee": ".strip"
+        },
+        {
+          "caller": "input_int",
+          "callee": "int"
+        },
+        {
+          "caller": "input_str",
+          "callee": "input"
+        },
+        {
+          "caller": "input_int",
+          "callee": "input"
+        },
+        {
+          "caller": "input_int",
+          "callee": "print"
+        }
+      ],
+      "language": "python"
+    },
+    "task_manager.py": {
+      "imports": [
+        "json",
+        "typing"
+      ],
+      "api_dependencies": [
+        "sql"
+      ],
+      "definitions": {
+        "functions": [],
+        "classes": [
+          {
+            "name": "Task",
+            "bases": [],
+            "methods": [
+              {
+                "name": "__init__",
+                "args": [
+                  "self",
+                  "id",
+                  "name",
+                  "description",
+                  "priority"
+                ],
+                "docstring": ""
+              }
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "TaskManager",
+            "bases": [],
+            "methods": [
+              {
+                "name": "__init__",
+                "args": [
+                  "self"
+                ],
+                "docstring": ""
+              },
+              {
+                "name": "add_task",
+                "args": [
+                  "self",
+                  "task_name",
+                  "description",
+                  "priority"
+                ],
+                "docstring": ""
+              },
+              {
+                "name": "remove_task",
+                "args": [
+                  "self",
+                  "task_id"
+                ],
+                "docstring": ""
+              },
+              {
+                "name": "update_task",
+                "args": [
+                  "self",
+                  "task_id",
+                  "new_description",
+                  "new_priority"
+                ],
+                "docstring": ""
+              },
+              {
+                "name": "get_tasks",
+                "args": [
+                  "self"
+                ],
+                "docstring": ""
+              },
+              {
+                "name": "persist_to_json",
+                "args": [
+                  "self",
+                  "file_path"
+                ],
+                "docstring": ""
+              },
+              {
+                "name": "load_from_json",
+                "args": [
+                  "self",
+                  "file_path"
+                ],
+                "docstring": ""
+              }
+            ],
+            "docstring": ""
+          }
+        ]
+      },
+      "call_edges": [
+        {
+          "caller": "add_task",
+          "callee": "Task"
+        },
+        {
+          "caller": "get_tasks",
+          "callee": "list"
+        },
+        {
+          "caller": "load_from_json",
+          "callee": "self.tasks.clear"
+        },
+        {
+          "caller": "add_task",
+          "callee": "ValueError"
+        },
+        {
+          "caller": "remove_task",
+          "callee": "ValueError"
+        },
+        {
+          "caller": "update_task",
+          "callee": "ValueError"
+        },
+        {
+          "caller": "update_task",
+          "callee": "ValueError"
+        },
+        {
+          "caller": "get_tasks",
+          "callee": "self.tasks.values"
+        },
+        {
+          "caller": "persist_to_json",
+          "callee": "open"
+        },
+        {
+          "caller": "persist_to_json",
+          "callee": "json.dump"
+        },
+        {
+          "caller": "load_from_json",
+          "callee": "open"
+        },
+        {
+          "caller": "load_from_json",
+          "callee": "json.load"
+        },
+        {
+          "caller": "load_from_json",
+          "callee": "Task"
+        },
+        {
+          "caller": "persist_to_json",
+          "callee": "self.tasks.values"
+        },
+        {
+          "caller": "load_from_json",
+          "callee": "max"
+        },
+        {
+          "caller": "load_from_json",
+          "callee": "self.tasks.values"
+        }
+      ],
+      "language": "python"
+    },
+    "main.py": {
+      "imports": [
+        "task_manager",
+        "utils"
+      ],
+      "api_dependencies": [
+        "sql"
+      ],
+      "definitions": {
+        "functions": [
+          {
+            "name": "display_menu",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "handle_add_task",
+            "args": [
+              "task_manager"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "handle_remove_task",
+            "args": [
+              "task_manager"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "handle_update_task",
+            "args": [
+              "task_manager"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "handle_list_tasks",
+            "args": [
+              "task_manager"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "handle_persist_to_json",
+            "args": [
+              "task_manager"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "handle_load_from_json",
+            "args": [
+              "task_manager"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "main",
+            "args": [],
+            "docstring": ""
+          }
+        ],
+        "classes": []
+      },
+      "call_edges": [
+        {
+          "caller": "display_menu",
+          "callee": "print"
+        },
+        {
+          "caller": "display_menu",
+          "callee": "print"
+        },
+        {
+          "caller": "display_menu",
+          "callee": "print"
+        },
+        {
+          "caller": "display_menu",
+          "callee": "print"
+        },
+        {
+          "caller": "display_menu",
+          "callee": "print"
+        },
+        {
+          "caller": "display_menu",
+          "callee": "print"
+        },
+        {
+          "caller": "display_menu",
+          "callee": "print"
+        },
+        {
+          "caller": "display_menu",
+          "callee": "print"
+        },
+        {
+          "caller": "handle_add_task",
+          "callee": "input_str"
+        },
+        {
+          "caller": "handle_add_task",
+          "callee": "input_str"
+        },
+        {
+          "caller": "handle_add_task",
+          "callee": "input_int"
+        },
+        {
+          "caller": "handle_remove_task",
+          "callee": "input_int"
+        },
+        {
+          "caller": "handle_update_task",
+          "callee": "input_int"
+        },
+        {
+          "caller": "handle_update_task",
+          "callee": "input_str"
+        },
+        {
+          "caller": "handle_update_task",
+          "callee": "input_int"
+        },
+        {
+          "caller": "handle_list_tasks",
+          "callee": "task_manager.get_tasks"
+        },
+        {
+          "caller": "handle_persist_to_json",
+          "callee": "input_str"
+        },
+        {
+          "caller": "handle_persist_to_json",
+          "callee": "task_manager.persist_to_json"
+        },
+        {
+          "caller": "handle_persist_to_json",
+          "callee": "print"
+        },
+        {
+          "caller": "handle_load_from_json",
+          "callee": "input_str"
+        },
+        {
+          "caller": "handle_load_from_json",
+          "callee": "task_manager.load_from_json"
+        },
+        {
+          "caller": "handle_load_from_json",
+          "callee": "print"
+        },
+        {
+          "caller": "main",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "<unknown>",
+          "callee": "main"
+        },
+        {
+          "caller": "handle_add_task",
+          "callee": "task_manager.add_task"
+        },
+        {
+          "caller": "handle_add_task",
+          "callee": "print"
+        },
+        {
+          "caller": "handle_remove_task",
+          "callee": "task_manager.remove_task"
+        },
+        {
+          "caller": "handle_remove_task",
+          "callee": "print"
+        },
+        {
+          "caller": "handle_update_task",
+          "callee": "task_manager.update_task"
+        },
+        {
+          "caller": "handle_update_task",
+          "callee": "print"
+        },
+        {
+          "caller": "handle_list_tasks",
+          "callee": "print"
+        },
+        {
+          "caller": "main",
+          "callee": "display_menu"
+        },
+        {
+          "caller": "main",
+          "callee": "input_int"
+        },
+        {
+          "caller": "handle_add_task",
+          "callee": "print"
+        },
+        {
+          "caller": "handle_remove_task",
+          "callee": "print"
+        },
+        {
+          "caller": "handle_update_task",
+          "callee": "print"
+        },
+        {
+          "caller": "handle_list_tasks",
+          "callee": "print"
+        },
+        {
+          "caller": "main",
+          "callee": "handle_add_task"
+        },
+        {
+          "caller": "main",
+          "callee": "handle_remove_task"
+        },
+        {
+          "caller": "main",
+          "callee": "handle_update_task"
+        },
+        {
+          "caller": "main",
+          "callee": "handle_list_tasks"
+        },
+        {
+          "caller": "main",
+          "callee": "handle_persist_to_json"
+        },
+        {
+          "caller": "main",
+          "callee": "handle_load_from_json"
+        },
+        {
+          "caller": "main",
+          "callee": "print"
+        },
+        {
+          "caller": "main",
+          "callee": "print"
+        }
+      ],
+      "language": "python"
+    },
+    "tests/test_utils.py": {
+      "imports": [
+        "pytest",
+        "utils"
+      ],
+      "api_dependencies": [
+        "sql"
+      ],
+      "definitions": {
+        "functions": [
+          {
+            "name": "test_input_int_valid",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_input_int_invalid",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_input_str_valid",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_input_str_empty",
+            "args": [],
+            "docstring": ""
+          }
+        ],
+        "classes": []
+      },
+      "call_edges": [
+        {
+          "caller": "test_input_int_valid",
+          "callee": "input_int"
+        },
+        {
+          "caller": "test_input_int_invalid",
+          "callee": "pytest.raises"
+        },
+        {
+          "caller": "test_input_int_invalid",
+          "callee": "input_int"
+        },
+        {
+          "caller": "test_input_str_valid",
+          "callee": "input_str"
+        },
+        {
+          "caller": "test_input_str_empty",
+          "callee": "input_str"
+        }
+      ],
+      "language": "python"
+    },
+    "tests/test_task_manager.py": {
+      "imports": [
+        "pytest",
+        "task_manager"
+      ],
+      "api_dependencies": [
+        "sql"
+      ],
+      "definitions": {
+        "functions": [
+          {
+            "name": "test_add_task_valid",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_add_task_invalid_priority",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_remove_task_valid",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_remove_task_invalid_id",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_update_task_valid",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_update_task_invalid_id",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_update_task_invalid_priority",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_get_tasks",
+            "args": [],
+            "docstring": ""
+          },
+          {
+            "name": "test_persist_to_json",
+            "args": [
+              "tmp_path"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "test_load_from_json",
+            "args": [
+              "tmp_path"
+            ],
+            "docstring": ""
+          }
+        ],
+        "classes": []
+      },
+      "call_edges": [
+        {
+          "caller": "test_add_task_valid",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_add_task_valid",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_add_task_invalid_priority",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_remove_task_valid",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_remove_task_valid",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_remove_task_valid",
+          "callee": "tm.remove_task"
+        },
+        {
+          "caller": "test_remove_task_invalid_id",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_update_task_valid",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_update_task_valid",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_update_task_valid",
+          "callee": "tm.update_task"
+        },
+        {
+          "caller": "test_update_task_invalid_id",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_update_task_invalid_priority",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_update_task_invalid_priority",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_get_tasks",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_get_tasks",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_get_tasks",
+          "callee": "tm.get_tasks"
+        },
+        {
+          "caller": "test_persist_to_json",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_persist_to_json",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_persist_to_json",
+          "callee": "tm.persist_to_json"
+        },
+        {
+          "caller": "test_load_from_json",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_load_from_json",
+          "callee": "tm.load_from_json"
+        },
+        {
+          "caller": "test_add_task_valid",
+          "callee": "len"
+        },
+        {
+          "caller": "test_add_task_invalid_priority",
+          "callee": "pytest.raises"
+        },
+        {
+          "caller": "test_add_task_invalid_priority",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_remove_task_valid",
+          "callee": "len"
+        },
+        {
+          "caller": "test_remove_task_invalid_id",
+          "callee": "pytest.raises"
+        },
+        {
+          "caller": "test_remove_task_invalid_id",
+          "callee": "tm.remove_task"
+        },
+        {
+          "caller": "test_update_task_invalid_id",
+          "callee": "pytest.raises"
+        },
+        {
+          "caller": "test_update_task_invalid_id",
+          "callee": "tm.update_task"
+        },
+        {
+          "caller": "test_update_task_invalid_priority",
+          "callee": "pytest.raises"
+        },
+        {
+          "caller": "test_update_task_invalid_priority",
+          "callee": "tm.update_task"
+        },
+        {
+          "caller": "test_get_tasks",
+          "callee": "len"
+        },
+        {
+          "caller": "test_persist_to_json",
+          "callee": "str"
+        },
+        {
+          "caller": "test_persist_to_json",
+          "callee": "open"
+        },
+        {
+          "caller": "test_persist_to_json",
+          "callee": "json.load"
+        },
+        {
+          "caller": "test_persist_to_json",
+          "callee": "len"
+        },
+        {
+          "caller": "test_load_from_json",
+          "callee": "open"
+        },
+        {
+          "caller": "test_load_from_json",
+          "callee": "json.dump"
+        },
+        {
+          "caller": "test_load_from_json",
+          "callee": "str"
+        },
+        {
+          "caller": "test_load_from_json",
+          "callee": "len"
+        }
+      ],
+      "language": "python"
+    },
+    "tests/test_main.py": {
+      "imports": [
+        "main",
+        "pytest"
+      ],
+      "api_dependencies": [
+        "sql"
+      ],
+      "definitions": {
+        "functions": [
+          {
+            "name": "test_display_menu",
+            "args": [
+              "capsys"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "test_handle_add_task",
+            "args": [
+              "monkeypatch"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "test_handle_remove_task",
+            "args": [
+              "monkeypatch"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "test_handle_update_task",
+            "args": [
+              "monkeypatch"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "test_handle_list_tasks",
+            "args": [
+              "monkeypatch",
+              "capsys"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "test_handle_persist_to_json",
+            "args": [
+              "monkeypatch",
+              "tmp_path"
+            ],
+            "docstring": ""
+          },
+          {
+            "name": "test_handle_load_from_json",
+            "args": [
+              "monkeypatch",
+              "tmp_path"
+            ],
+            "docstring": ""
+          }
+        ],
+        "classes": []
+      },
+      "call_edges": [
+        {
+          "caller": "test_display_menu",
+          "callee": "display_menu"
+        },
+        {
+          "caller": "test_display_menu",
+          "callee": "capsys.readouterr"
+        },
+        {
+          "caller": "test_handle_add_task",
+          "callee": "monkeypatch.setattr"
+        },
+        {
+          "caller": "test_handle_add_task",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_handle_add_task",
+          "callee": "handle_add_task"
+        },
+        {
+          "caller": "test_handle_remove_task",
+          "callee": "monkeypatch.setattr"
+        },
+        {
+          "caller": "test_handle_remove_task",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_handle_remove_task",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_handle_remove_task",
+          "callee": "handle_remove_task"
+        },
+        {
+          "caller": "test_handle_update_task",
+          "callee": "monkeypatch.setattr"
+        },
+        {
+          "caller": "test_handle_update_task",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_handle_update_task",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_handle_update_task",
+          "callee": "handle_update_task"
+        },
+        {
+          "caller": "test_handle_list_tasks",
+          "callee": "monkeypatch.setattr"
+        },
+        {
+          "caller": "test_handle_list_tasks",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_handle_list_tasks",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_handle_list_tasks",
+          "callee": "handle_list_tasks"
+        },
+        {
+          "caller": "test_handle_list_tasks",
+          "callee": "capsys.readouterr"
+        },
+        {
+          "caller": "test_handle_persist_to_json",
+          "callee": "monkeypatch.setattr"
+        },
+        {
+          "caller": "test_handle_persist_to_json",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_handle_persist_to_json",
+          "callee": "tm.add_task"
+        },
+        {
+          "caller": "test_handle_persist_to_json",
+          "callee": "handle_persist_to_json"
+        },
+        {
+          "caller": "test_handle_persist_to_json",
+          "callee": ".exists"
+        },
+        {
+          "caller": "test_handle_load_from_json",
+          "callee": "monkeypatch.setattr"
+        },
+        {
+          "caller": "test_handle_load_from_json",
+          "callee": "TaskManager"
+        },
+        {
+          "caller": "test_handle_load_from_json",
+          "callee": "handle_load_from_json"
+        },
+        {
+          "caller": "test_handle_add_task",
+          "callee": "len"
+        },
+        {
+          "caller": "test_handle_remove_task",
+          "callee": "len"
+        },
+        {
+          "caller": "test_handle_load_from_json",
+          "callee": "open"
+        },
+        {
+          "caller": "test_handle_load_from_json",
+          "callee": "json.dump"
+        },
+        {
+          "caller": "test_handle_load_from_json",
+          "callee": "len"
+        },
+        {
+          "caller": "test_handle_persist_to_json",
+          "callee": "str"
+        },
+        {
+          "caller": "test_handle_load_from_json",
+          "callee": "str"
+        }
+      ],
+      "language": "python"
+    }
+  },
+  "module_imports": {
+    "utils.py": [],
+    "task_manager.py": [
+      "json",
+      "typing"
+    ],
+    "main.py": [
+      "task_manager",
+      "utils"
+    ],
+    "tests/test_utils.py": [
+      "pytest",
+      "utils"
+    ],
+    "tests/test_task_manager.py": [
+      "pytest",
+      "task_manager"
+    ],
+    "tests/test_main.py": [
+      "main",
+      "pytest"
+    ]
+  },
+  "api_dependencies": [],
+  "db_dependencies": [
+    "sql"
+  ],
+  "class_dependency_graph": {
+    "Task": [],
+    "TaskManager": []
+  },
+  "function_call_graph": [
+    {
+      "caller": "input_str",
+      "callee": ".strip"
+    },
+    {
+      "caller": "input_int",
+      "callee": "int"
+    },
+    {
+      "caller": "input_str",
+      "callee": "input"
+    },
+    {
+      "caller": "input_int",
+      "callee": "input"
+    },
+    {
+      "caller": "input_int",
+      "callee": "print"
+    },
+    {
+      "caller": "add_task",
+      "callee": "Task"
+    },
+    {
+      "caller": "get_tasks",
+      "callee": "list"
+    },
+    {
+      "caller": "load_from_json",
+      "callee": "self.tasks.clear"
+    },
+    {
+      "caller": "add_task",
+      "callee": "ValueError"
+    },
+    {
+      "caller": "remove_task",
+      "callee": "ValueError"
+    },
+    {
+      "caller": "update_task",
+      "callee": "ValueError"
+    },
+    {
+      "caller": "update_task",
+      "callee": "ValueError"
+    },
+    {
+      "caller": "get_tasks",
+      "callee": "self.tasks.values"
+    },
+    {
+      "caller": "persist_to_json",
+      "callee": "open"
+    },
+    {
+      "caller": "persist_to_json",
+      "callee": "json.dump"
+    },
+    {
+      "caller": "load_from_json",
+      "callee": "open"
+    },
+    {
+      "caller": "load_from_json",
+      "callee": "json.load"
+    },
+    {
+      "caller": "load_from_json",
+      "callee": "Task"
+    },
+    {
+      "caller": "persist_to_json",
+      "callee": "self.tasks.values"
+    },
+    {
+      "caller": "load_from_json",
+      "callee": "max"
+    },
+    {
+      "caller": "load_from_json",
+      "callee": "self.tasks.values"
+    },
+    {
+      "caller": "display_menu",
+      "callee": "print"
+    },
+    {
+      "caller": "display_menu",
+      "callee": "print"
+    },
+    {
+      "caller": "display_menu",
+      "callee": "print"
+    },
+    {
+      "caller": "display_menu",
+      "callee": "print"
+    },
+    {
+      "caller": "display_menu",
+      "callee": "print"
+    },
+    {
+      "caller": "display_menu",
+      "callee": "print"
+    },
+    {
+      "caller": "display_menu",
+      "callee": "print"
+    },
+    {
+      "caller": "display_menu",
+      "callee": "print"
+    },
+    {
+      "caller": "handle_add_task",
+      "callee": "input_str"
+    },
+    {
+      "caller": "handle_add_task",
+      "callee": "input_str"
+    },
+    {
+      "caller": "handle_add_task",
+      "callee": "input_int"
+    },
+    {
+      "caller": "handle_remove_task",
+      "callee": "input_int"
+    },
+    {
+      "caller": "handle_update_task",
+      "callee": "input_int"
+    },
+    {
+      "caller": "handle_update_task",
+      "callee": "input_str"
+    },
+    {
+      "caller": "handle_update_task",
+      "callee": "input_int"
+    },
+    {
+      "caller": "handle_list_tasks",
+      "callee": "task_manager.get_tasks"
+    },
+    {
+      "caller": "handle_persist_to_json",
+      "callee": "input_str"
+    },
+    {
+      "caller": "handle_persist_to_json",
+      "callee": "task_manager.persist_to_json"
+    },
+    {
+      "caller": "handle_persist_to_json",
+      "callee": "print"
+    },
+    {
+      "caller": "handle_load_from_json",
+      "callee": "input_str"
+    },
+    {
+      "caller": "handle_load_from_json",
+      "callee": "task_manager.load_from_json"
+    },
+    {
+      "caller": "handle_load_from_json",
+      "callee": "print"
+    },
+    {
+      "caller": "main",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "<unknown>",
+      "callee": "main"
+    },
+    {
+      "caller": "handle_add_task",
+      "callee": "task_manager.add_task"
+    },
+    {
+      "caller": "handle_add_task",
+      "callee": "print"
+    },
+    {
+      "caller": "handle_remove_task",
+      "callee": "task_manager.remove_task"
+    },
+    {
+      "caller": "handle_remove_task",
+      "callee": "print"
+    },
+    {
+      "caller": "handle_update_task",
+      "callee": "task_manager.update_task"
+    },
+    {
+      "caller": "handle_update_task",
+      "callee": "print"
+    },
+    {
+      "caller": "handle_list_tasks",
+      "callee": "print"
+    },
+    {
+      "caller": "main",
+      "callee": "display_menu"
+    },
+    {
+      "caller": "main",
+      "callee": "input_int"
+    },
+    {
+      "caller": "handle_add_task",
+      "callee": "print"
+    },
+    {
+      "caller": "handle_remove_task",
+      "callee": "print"
+    },
+    {
+      "caller": "handle_update_task",
+      "callee": "print"
+    },
+    {
+      "caller": "handle_list_tasks",
+      "callee": "print"
+    },
+    {
+      "caller": "main",
+      "callee": "handle_add_task"
+    },
+    {
+      "caller": "main",
+      "callee": "handle_remove_task"
+    },
+    {
+      "caller": "main",
+      "callee": "handle_update_task"
+    },
+    {
+      "caller": "main",
+      "callee": "handle_list_tasks"
+    },
+    {
+      "caller": "main",
+      "callee": "handle_persist_to_json"
+    },
+    {
+      "caller": "main",
+      "callee": "handle_load_from_json"
+    },
+    {
+      "caller": "main",
+      "callee": "print"
+    },
+    {
+      "caller": "main",
+      "callee": "print"
+    },
+    {
+      "caller": "test_input_int_valid",
+      "callee": "input_int"
+    },
+    {
+      "caller": "test_input_int_invalid",
+      "callee": "pytest.raises"
+    },
+    {
+      "caller": "test_input_int_invalid",
+      "callee": "input_int"
+    },
+    {
+      "caller": "test_input_str_valid",
+      "callee": "input_str"
+    },
+    {
+      "caller": "test_input_str_empty",
+      "callee": "input_str"
+    },
+    {
+      "caller": "test_add_task_valid",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_add_task_valid",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_add_task_invalid_priority",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_remove_task_valid",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_remove_task_valid",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_remove_task_valid",
+      "callee": "tm.remove_task"
+    },
+    {
+      "caller": "test_remove_task_invalid_id",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_update_task_valid",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_update_task_valid",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_update_task_valid",
+      "callee": "tm.update_task"
+    },
+    {
+      "caller": "test_update_task_invalid_id",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_update_task_invalid_priority",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_update_task_invalid_priority",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_get_tasks",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_get_tasks",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_get_tasks",
+      "callee": "tm.get_tasks"
+    },
+    {
+      "caller": "test_persist_to_json",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_persist_to_json",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_persist_to_json",
+      "callee": "tm.persist_to_json"
+    },
+    {
+      "caller": "test_load_from_json",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_load_from_json",
+      "callee": "tm.load_from_json"
+    },
+    {
+      "caller": "test_add_task_valid",
+      "callee": "len"
+    },
+    {
+      "caller": "test_add_task_invalid_priority",
+      "callee": "pytest.raises"
+    },
+    {
+      "caller": "test_add_task_invalid_priority",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_remove_task_valid",
+      "callee": "len"
+    },
+    {
+      "caller": "test_remove_task_invalid_id",
+      "callee": "pytest.raises"
+    },
+    {
+      "caller": "test_remove_task_invalid_id",
+      "callee": "tm.remove_task"
+    },
+    {
+      "caller": "test_update_task_invalid_id",
+      "callee": "pytest.raises"
+    },
+    {
+      "caller": "test_update_task_invalid_id",
+      "callee": "tm.update_task"
+    },
+    {
+      "caller": "test_update_task_invalid_priority",
+      "callee": "pytest.raises"
+    },
+    {
+      "caller": "test_update_task_invalid_priority",
+      "callee": "tm.update_task"
+    },
+    {
+      "caller": "test_get_tasks",
+      "callee": "len"
+    },
+    {
+      "caller": "test_persist_to_json",
+      "callee": "str"
+    },
+    {
+      "caller": "test_persist_to_json",
+      "callee": "open"
+    },
+    {
+      "caller": "test_persist_to_json",
+      "callee": "json.load"
+    },
+    {
+      "caller": "test_persist_to_json",
+      "callee": "len"
+    },
+    {
+      "caller": "test_load_from_json",
+      "callee": "open"
+    },
+    {
+      "caller": "test_load_from_json",
+      "callee": "json.dump"
+    },
+    {
+      "caller": "test_load_from_json",
+      "callee": "str"
+    },
+    {
+      "caller": "test_load_from_json",
+      "callee": "len"
+    },
+    {
+      "caller": "test_display_menu",
+      "callee": "display_menu"
+    },
+    {
+      "caller": "test_display_menu",
+      "callee": "capsys.readouterr"
+    },
+    {
+      "caller": "test_handle_add_task",
+      "callee": "monkeypatch.setattr"
+    },
+    {
+      "caller": "test_handle_add_task",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_handle_add_task",
+      "callee": "handle_add_task"
+    },
+    {
+      "caller": "test_handle_remove_task",
+      "callee": "monkeypatch.setattr"
+    },
+    {
+      "caller": "test_handle_remove_task",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_handle_remove_task",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_handle_remove_task",
+      "callee": "handle_remove_task"
+    },
+    {
+      "caller": "test_handle_update_task",
+      "callee": "monkeypatch.setattr"
+    },
+    {
+      "caller": "test_handle_update_task",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_handle_update_task",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_handle_update_task",
+      "callee": "handle_update_task"
+    },
+    {
+      "caller": "test_handle_list_tasks",
+      "callee": "monkeypatch.setattr"
+    },
+    {
+      "caller": "test_handle_list_tasks",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_handle_list_tasks",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_handle_list_tasks",
+      "callee": "handle_list_tasks"
+    },
+    {
+      "caller": "test_handle_list_tasks",
+      "callee": "capsys.readouterr"
+    },
+    {
+      "caller": "test_handle_persist_to_json",
+      "callee": "monkeypatch.setattr"
+    },
+    {
+      "caller": "test_handle_persist_to_json",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_handle_persist_to_json",
+      "callee": "tm.add_task"
+    },
+    {
+      "caller": "test_handle_persist_to_json",
+      "callee": "handle_persist_to_json"
+    },
+    {
+      "caller": "test_handle_persist_to_json",
+      "callee": ".exists"
+    },
+    {
+      "caller": "test_handle_load_from_json",
+      "callee": "monkeypatch.setattr"
+    },
+    {
+      "caller": "test_handle_load_from_json",
+      "callee": "TaskManager"
+    },
+    {
+      "caller": "test_handle_load_from_json",
+      "callee": "handle_load_from_json"
+    },
+    {
+      "caller": "test_handle_add_task",
+      "callee": "len"
+    },
+    {
+      "caller": "test_handle_remove_task",
+      "callee": "len"
+    },
+    {
+      "caller": "test_handle_load_from_json",
+      "callee": "open"
+    },
+    {
+      "caller": "test_handle_load_from_json",
+      "callee": "json.dump"
+    },
+    {
+      "caller": "test_handle_load_from_json",
+      "callee": "len"
+    },
+    {
+      "caller": "test_handle_persist_to_json",
+      "callee": "str"
+    },
+    {
+      "caller": "test_handle_load_from_json",
+      "callee": "str"
+    }
+  ]
+}

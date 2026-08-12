@@ -1,0 +1,6 @@
+FROM qwen2.5-coder:14b
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+PARAMETER stop "\nObservation"
+PARAMETER stop "\nObservation:"
+PARAMETER num_ctx 8192

@@ -1,0 +1,5 @@
+- [NEW] The system shall implement a queue data structure in C.
+- [NEW] The system shall provide an enqueue function for adding elements to the queue.
+- [NEW] The system shall provide a dequeue function for removing elements from the queue.
+- [NEW] The system shall provide a peek function for viewing the front element of the queue without removing it.
+- [NEW] The system shall provide an is_empty function to check if the queue is empty.

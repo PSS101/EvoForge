@@ -1,0 +1,94 @@
+[
+  {
+    "file_path": "test_calc_cpp.cpp",
+    "name": "test_calc_cpp_init",
+    "return_type": "void",
+    "params": [
+      "Test_calc_cpp &m",
+      "const std::string &name"
+    ],
+    "signature": "void test_calc_cpp_init(Test_calc_cpp &m, const std::string &name)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_calc_cpp.cpp",
+    "name": "test_calc_cpp_add_entry",
+    "return_type": "void",
+    "params": [
+      "Test_calc_cpp &m",
+      "double val"
+    ],
+    "signature": "void test_calc_cpp_add_entry(Test_calc_cpp &m, double val)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_calc_cpp.cpp",
+    "name": "test_calc_cpp_count",
+    "return_type": "std::size_t",
+    "params": [
+      "const Test_calc_cpp &m"
+    ],
+    "signature": "std::size_t test_calc_cpp_count(const Test_calc_cpp &m)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_calc_cpp.cpp",
+    "name": "test_calc_cpp_clear",
+    "return_type": "void",
+    "params": [
+      "Test_calc_cpp &m"
+    ],
+    "signature": "void test_calc_cpp_clear(Test_calc_cpp &m)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_calc_cpp.hpp",
+    "name": "test_calc_cpp_init",
+    "return_type": "void",
+    "params": [
+      "Test_calc_cpp &m",
+      "const std::string &name"
+    ],
+    "signature": "void test_calc_cpp_init(Test_calc_cpp &m, const std::string &name)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_calc_cpp.hpp",
+    "name": "test_calc_cpp_add_entry",
+    "return_type": "void",
+    "params": [
+      "Test_calc_cpp &m",
+      "double val"
+    ],
+    "signature": "void test_calc_cpp_add_entry(Test_calc_cpp &m, double val)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_calc_cpp.hpp",
+    "name": "test_calc_cpp_count",
+    "return_type": "std::size_t",
+    "params": [
+      "const Test_calc_cpp &m"
+    ],
+    "signature": "std::size_t test_calc_cpp_count(const Test_calc_cpp &m)",
+    "is_core": 1
+  },
+  {
+    "file_path": "test_calc_cpp.hpp",
+    "name": "test_calc_cpp_clear",
+    "return_type": "void",
+    "params": [
+      "Test_calc_cpp &m"
+    ],
+    "signature": "void test_calc_cpp_clear(Test_calc_cpp &m)",
+    "is_core": 1
+  },
+  {
+    "file_path": "main.cpp",
+    "name": "main",
+    "return_type": "int",
+    "params": [],
+    "signature": "int main()",
+    "is_core": 0
+  }
+]

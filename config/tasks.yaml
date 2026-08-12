@@ -1,0 +1,136 @@
+requirement_task:
+  description: >
+    Analyze the new user requirements prompt: "{prompt}".
+    Compare these new requirements with the existing SRS:
+    "{existing_srs}"
+    
+    You MUST merge the new requirements, features, and changes from the user prompt into the existing SRS, producing an elaborate, professional ISO/IEC/IEEE 29148 Software Requirements Specification (SRS.md).
+    
+    Structure the SRS.md strictly according to the ISO/IEC/IEEE 29148:2018 standard layout:
+    1. Introduction & Project Scope (Purpose, System Vision, Product Perspective, User Characteristics, Definitions & Acronyms).
+    2. References & Applicable Standards (ISO/IEC/IEEE 29148, domain standards, external specs).
+    3. Specific Requirements:
+       - 3.1 External Interface Requirements (User Interfaces, API/CLI Interfaces, Data Exchange Formats).
+       - 3.2 System Capabilities & Functional Requirements (Core Operations, Input Validation & Error Handling, Data Processing, Status Monitoring).
+       - 3.3 System Quality Attributes & Non-Functional Requirements (Performance & Latency, Reliability & Safety, Maintainability, Security & Verification).
+       - 3.4 Operational & Design Constraints (Memory bounds, execution limits, exit codes).
+    4. Verification Criteria & Acceptance Tests (Verification method matrix for each requirement).
+    5. Appendices & Supporting Information (Glossary, assumption log).
+    
+    For every single requirement line under Functional and Non-Functional sections, classify it into one of these categories:
+    - [NEW]: Added by the current prompt.
+    - [MODIFIED]: Modified or updated from the existing SRS by the current prompt.
+    - [REMOVED]: Existed in the previous SRS but is now deprecated, obsolete, or explicitly deleted by the current prompt.
+    - [UNCHANGED]: Exists in the previous SRS and is untouched by the current prompt.
+    
+    Format every requirement line with its classification tag (e.g., "- [UNCHANGED] The system shall...").
+    Elaborate on edge cases, validation rules, and error handling for each functional capability in pure specification English.
+    STRICT PROHIBITION: You MUST NOT write source code, programming implementations, or code blocks (e.g. no ```python, ```cpp, ```c, or pseudo-code) inside SRS.md. Focus 100% on WHAT the system shall do (requirements), NEVER on code implementation.
+    
+    You MUST output the entire updated markdown content of the SRS.md file.
+    Do NOT output any conversational text, explanations, intro, outro, or markdown code blocks (e.g. do not wrap the output in ```markdown). Output ONLY the raw markdown of the file itself.
+  expected_output: >
+    The complete, raw markdown content of the updated SRS.md file containing the classified requirement lists. Absolutely no conversational filler, no code block backticks, just the raw file content.
+
+impact_task:
+  description: >
+    Compare the newly updated SRS.md with the historical file registry: {existing_files_summary}.
+    Analyze how the requirements delta impacts the existing codebase using AST call graph structures and sqlite file metadata.
+    Generate a precise Impact_Report.md detailing:
+    1. Requirement Delta Summary (what features were added, modified, or removed).
+    2. File Impact Classification (categorized strictly into NEW, MODIFY, UNCHANGED).
+    3. Detailed Refactoring Guidelines for the Development Agent, explicitly instructing that UNCHANGED files must NOT be touched or rewritten.
+    4. Component Reuse Decisions (identifying existing functions, classes, and headers to reuse).
+    Do NOT wrap the output in markdown code blocks or add conversational preamble. Output ONLY the raw markdown content of the Impact_Report.md file.
+  expected_output: >
+    The complete, raw markdown content of the Impact_Report.md file. Absolutely no conversational filler, no code block backticks, just the raw file content.
+
+design_task:
+  description: >
+    Review the SRS.md at {reports_dir}/SRS.md and the Requirement_Delta_Report.md at {delta_path} (if any).
+    Generate or update the Design.md file at {reports_dir}/Design.md following Clean Architecture and SOLID principles.
+    Structure Design.md with:
+    1. System Architecture Overview (decoupled modular layers: Core Domain Logic vs CLI Entry Point vs Tests).
+    2. Module & Class Specifications (exact class names, struct definitions, method signatures, parameter types, return values, docstrings).
+    3. Visual Sequence Diagrams (represented using Mermaid.js `sequenceDiagram` mapping User -> Main CLI -> Domain Service -> Response).
+    4. Data Models & Boundary Validation Rules (dynamic memory handling, allocation limits, error state models).
+    Keep it strictly synchronized with the functional requirements in SRS.md.
+    Do NOT wrap the output in markdown code blocks or add conversational preamble. Output ONLY the raw markdown content of the Design.md file.
+  expected_output: >
+    The complete, raw markdown content of the Design.md file. Absolutely no conversational filler, no code block backticks, just the raw file content.
+
+code_task:
+  description: >
+    Write, modify, or extend source code based on Design.md and SRS.md provided below.
+    The project codebase is located at: {project_dir}.
+    
+    ### Mandatory Specifications from SRS.md:
+    {srs_content}
+    
+    ### Mandatory Architecture & API Specs from Design.md:
+    {design_content}
+    
+    ### Core C/C++ Functions Reference:
+    {core_c_functions}
+    
+    Follow these rules strictly:
+    1. Base your implementation 100% on the SRS.md and Design.md specifications above. Do NOT copy unrelated code or templates from other projects.
+    2. Reference and reuse existing core C/C++ functions listed above when generating C or C++ source and header files. Maintain consistency with existing function signatures, return types, parameter definitions, and header declarations.
+    3. Only write new files or modify files specified in Design.md.
+    4. Preserve architecture, naming conventions, imports, type hints, and coding style.
+    5. Strictly enforce the target project language ({language}):
+       - For Python projects, produce clean PEP 8 Python files (`.py`) with type hints and modular functions.
+       - For C++ projects, produce clean C++17 source files (`.cpp`), header files (`.hpp`) with include guards/pragma once, enforcing RAII and smart pointers. Include a POSIX Makefile.
+       - For C projects, produce clean C11 source files (`.c`), header files (`.h`) with explicit memory management. Include a POSIX Makefile.
+    6. Ensure main entry point applications (e.g. main.cpp, main.c, main.py) provide an interactive CLI menu loop using native user input (`std::cin`, `scanf`, or `input()`) allowing users to enter input values dynamically, rather than hardcoding static values.
+    7. Implement boundary validation checks (division by zero, null pointers, out-of-bounds, negative parameters) before executing business logic routines.
+    8. You MUST output each source file using standard file blocks:
+       --- FILE: relative/path ---
+       ```language
+       <code>
+       ```
+
+
+  expected_output: >
+    Complete, functional, syntactically clean, and boundary-checked source files using standard file blocks.
+
+testing_task:
+  description: >
+    Review the project source code and requirements in SRS.md at {reports_dir}/SRS.md.
+    
+    ### Project Source Code Files:
+    {existing_source_code}
+    
+    Generate or update a self-contained, automated test suite inside the directory: {project_dir}/tests.
+    For Python projects, create/update PyTest files like `tests/test_*.py` importing the project modules shown above and using `pytest.raises()` for boundary exceptions.
+    For C/C++ projects, create/update a single `tests/test_runner.c` or `tests/test_runner.cpp` file that includes header files and exercises public APIs with non-interactive `assert()` statements.
+    Ensure tests cover positive functional paths, negative inputs, boundary conditions, and exception handling.
+    Ensure test files import or include modules correctly and execute independently.
+    
+    You MUST output all test files using standard file blocks:
+    --- FILE: tests/test_filename.py ---
+    ```python
+    # test code here
+    ```
+  expected_output: >
+    A complete, language-appropriate, assertion-backed test suite verifying application correctness under normal and boundary conditions using standard file blocks.
+
+documentation_task:
+  description: >
+    Review the project source code in {project_dir}, the SRS.md at {reports_dir}/SRS.md, and the Design.md at {reports_dir}/Design.md.
+    Update only the documentation that corresponds to modified APIs, workflows, or architecture changes.
+    Create or update:
+    1. {project_dir}/README.md: Installation guides, system prerequisites, feature lists, build commands (`make`), execution commands (`python main.py` or `./executable`), and automated test runner commands (`pytest` or `make test`).
+    2. {project_dir}/User_Manual.md: Detailed interactive user manual describing step-by-step CLI usage, available menu options, example inputs, expected outputs, and exit procedures.
+    
+    You MUST output all documentation files using standard file blocks:
+    --- FILE: README.md ---
+    ```markdown
+    # README content
+    ```
+    --- FILE: User_Manual.md ---
+    ```markdown
+    # User Manual content
+    ```
+  expected_output: >
+    Updated, professional, and comprehensive README.md and User_Manual.md files saved under the project directory using standard file blocks.

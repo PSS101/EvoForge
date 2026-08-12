@@ -1,0 +1,413 @@
+{
+  "modules": {
+    "core/node.py": {
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "api_dependencies": [
+        "sql"
+      ],
+      "definitions": {
+        "functions": [],
+        "classes": [
+          {
+            "name": "Node",
+            "bases": [],
+            "methods": [
+              {
+                "name": "update_height",
+                "args": [
+                  "self"
+                ],
+                "docstring": "Recalculate the node's height based on its children."
+              },
+              {
+                "name": "balance_factor",
+                "args": [
+                  "self"
+                ],
+                "docstring": "Return the difference between the heights of left and right subtrees."
+              }
+            ],
+            "docstring": "Represents a node in an AVL tree.\n\nAttributes\n----------\nkey : Any\n    Comparable value used for ordering.\nvalue : Any, optional\n    Payload stored with the key. Defaults to None.\nleft : Optional[Node], optional\n    Left child (subtree of keys < self.key). Defaults to None.\nright : Optional[Node], optional\n    Right child (subtree of keys > self.key). Defaults to None.\nheight : int, optional\n    Height of the node in the tree, used for balancing. Defaults to 1.\n\nMethods\n-------\nupdate_height()\n    Recalculate the node's height based on its children.\nbalance_factor() -> int\n    Return left.height - right.height."
+          }
+        ]
+      },
+      "call_edges": [
+        {
+          "caller": "Node",
+          "callee": "field"
+        },
+        {
+          "caller": "Node",
+          "callee": "field"
+        },
+        {
+          "caller": "Node",
+          "callee": "field"
+        },
+        {
+          "caller": "update_height",
+          "callee": "max"
+        }
+      ],
+      "language": "python"
+    },
+    "tests/test_node.py": {
+      "imports": [
+        "avl.core.node",
+        "pytest"
+      ],
+      "api_dependencies": [
+        "sql"
+      ],
+      "definitions": {
+        "functions": [
+          {
+            "name": "test_initialization",
+            "args": [],
+            "docstring": "Node should be created with correct defaults."
+          },
+          {
+            "name": "test_node_value_storage",
+            "args": [],
+            "docstring": "Node should store an arbitrary payload."
+          },
+          {
+            "name": "test_update_height_no_children",
+            "args": [],
+            "docstring": "Height remains 1 when there are no children."
+          },
+          {
+            "name": "test_update_height_left_child",
+            "args": [],
+            "docstring": "Height and balance factor with only a left child."
+          },
+          {
+            "name": "test_update_height_right_child",
+            "args": [],
+            "docstring": "Height and balance factor with only a right child."
+          },
+          {
+            "name": "test_update_height_both_children",
+            "args": [],
+            "docstring": "Height and balance factor when both children exist."
+          },
+          {
+            "name": "test_balance_factor_complex_tree",
+            "args": [],
+            "docstring": "Test balance factor on a deeper tree."
+          },
+          {
+            "name": "test_update_height_invalid_left",
+            "args": [],
+            "docstring": "update_height should raise AttributeError if left child is not a Node."
+          },
+          {
+            "name": "test_update_height_invalid_right",
+            "args": [],
+            "docstring": "update_height should raise AttributeError if right child is not a Node."
+          }
+        ],
+        "classes": []
+      },
+      "call_edges": [
+        {
+          "caller": "test_initialization",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_node_value_storage",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_no_children",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_no_children",
+          "callee": "n.update_height"
+        },
+        {
+          "caller": "test_update_height_left_child",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_left_child",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_left_child",
+          "callee": "parent.update_height"
+        },
+        {
+          "caller": "test_update_height_right_child",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_right_child",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_right_child",
+          "callee": "parent.update_height"
+        },
+        {
+          "caller": "test_update_height_both_children",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_both_children",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_both_children",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_both_children",
+          "callee": "parent.update_height"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "grandchild.update_height"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "left_child.update_height"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "right_child.update_height"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "root.update_height"
+        },
+        {
+          "caller": "test_update_height_invalid_left",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_invalid_right",
+          "callee": "Node"
+        },
+        {
+          "caller": "test_update_height_left_child",
+          "callee": "parent.balance_factor"
+        },
+        {
+          "caller": "test_update_height_right_child",
+          "callee": "parent.balance_factor"
+        },
+        {
+          "caller": "test_update_height_both_children",
+          "callee": "parent.balance_factor"
+        },
+        {
+          "caller": "test_balance_factor_complex_tree",
+          "callee": "root.balance_factor"
+        },
+        {
+          "caller": "test_update_height_invalid_left",
+          "callee": "pytest.raises"
+        },
+        {
+          "caller": "test_update_height_invalid_left",
+          "callee": "n.update_height"
+        },
+        {
+          "caller": "test_update_height_invalid_right",
+          "callee": "pytest.raises"
+        },
+        {
+          "caller": "test_update_height_invalid_right",
+          "callee": "n.update_height"
+        }
+      ],
+      "language": "python"
+    }
+  },
+  "module_imports": {
+    "core/node.py": [
+      "__future__",
+      "dataclasses",
+      "typing"
+    ],
+    "tests/test_node.py": [
+      "avl.core.node",
+      "pytest"
+    ]
+  },
+  "api_dependencies": [],
+  "db_dependencies": [
+    "sql"
+  ],
+  "class_dependency_graph": {
+    "Node": []
+  },
+  "function_call_graph": [
+    {
+      "caller": "Node",
+      "callee": "field"
+    },
+    {
+      "caller": "Node",
+      "callee": "field"
+    },
+    {
+      "caller": "Node",
+      "callee": "field"
+    },
+    {
+      "caller": "update_height",
+      "callee": "max"
+    },
+    {
+      "caller": "test_initialization",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_node_value_storage",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_no_children",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_no_children",
+      "callee": "n.update_height"
+    },
+    {
+      "caller": "test_update_height_left_child",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_left_child",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_left_child",
+      "callee": "parent.update_height"
+    },
+    {
+      "caller": "test_update_height_right_child",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_right_child",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_right_child",
+      "callee": "parent.update_height"
+    },
+    {
+      "caller": "test_update_height_both_children",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_both_children",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_both_children",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_both_children",
+      "callee": "parent.update_height"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "grandchild.update_height"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "left_child.update_height"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "right_child.update_height"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "root.update_height"
+    },
+    {
+      "caller": "test_update_height_invalid_left",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_invalid_right",
+      "callee": "Node"
+    },
+    {
+      "caller": "test_update_height_left_child",
+      "callee": "parent.balance_factor"
+    },
+    {
+      "caller": "test_update_height_right_child",
+      "callee": "parent.balance_factor"
+    },
+    {
+      "caller": "test_update_height_both_children",
+      "callee": "parent.balance_factor"
+    },
+    {
+      "caller": "test_balance_factor_complex_tree",
+      "callee": "root.balance_factor"
+    },
+    {
+      "caller": "test_update_height_invalid_left",
+      "callee": "pytest.raises"
+    },
+    {
+      "caller": "test_update_height_invalid_left",
+      "callee": "n.update_height"
+    },
+    {
+      "caller": "test_update_height_invalid_right",
+      "callee": "pytest.raises"
+    },
+    {
+      "caller": "test_update_height_invalid_right",
+      "callee": "n.update_height"
+    }
+  ]
+}
