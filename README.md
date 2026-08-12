@@ -232,13 +232,15 @@ EvoForge/
 
 ### 1. Prerequisites
 - Python 3.8+
-- Git
+- Git & [Git LFS](https://git-lfs.github.com) *(Required if restoring `evoforge_env.tar.gz` via Git)*
 - *(Optional for C/C++)* GCC / G++ and `make`
 - *(LLM Provider)* [Ollama](https://ollama.com)
 
 ### 2. Environment Setup
 Clone the repository and set up your `.env` file:
 ```bash
+git clone <repository-url>
+cd EvoForge
 cp .env.example .env
 ```
 
@@ -252,15 +254,26 @@ OLLAMA_BASE_URL=http://localhost:11434
 
 ### 📦 Conda Environment Setup & Packed Env Restore
 
+> [!IMPORTANT]
+> **Git LFS Note**: `evoforge_env.tar.gz` is stored using **Git LFS**. 
+> - If you cloned the repository via Git, run `git lfs pull` to download the complete ~376MB archive (otherwise you will only have a 130-byte pointer file).
+> - **GitHub Web "Download ZIP" Caveat**: Downloading the repository as a ZIP archive from the GitHub UI does **NOT** fetch Git LFS binary files automatically. If you downloaded a ZIP from GitHub, clone with Git instead or download the LFS binary directly.
+
 #### Option A: Unpacking Pre-packed Conda Archive (`evoforge_env.tar.gz`)
-If you have the pre-packed environment archive (`evoforge_env.tar.gz`), unpack and activate it directly without downloading packages:
+*(For Linux / WSL environments)*
 
 ```bash
+# 0. Ensure Git LFS payload is fetched
+git lfs pull
+
 # 1. Create a directory for the unpacked environment
 mkdir -p evoforge_env
 
-# 2. Extract the environment archive
+# 2. Extract the environment archive (.tar.gz)
 tar -xzf evoforge_env.tar.gz -C evoforge_env
+
+# (If using a .zip file instead of .tar.gz):
+# unzip evoforge_env.zip -d evoforge_env
 
 # 3. Activate the environment
 source evoforge_env/bin/activate
@@ -270,6 +283,8 @@ conda-unpack
 ```
 
 #### Option B: Creating Environment from `environment.yml`
+*(For Windows Native PowerShell / CMD or fresh installations)*
+
 ```bash
 # Create environment from environment.yml specification
 conda env create -f environment.yml -n evoforge_env
